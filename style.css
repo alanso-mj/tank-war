@@ -57,8 +57,14 @@ button {
 ================================= */
 
 #main-menu {
-  background: url("assets/menu-bg.png") center center / cover no-repeat;
-    );
+  background: url("assets/menu-bg.png") center / cover no-repeat;
+}
+
+#main-menu .sun,
+#main-menu .mountain,
+#main-menu .hill,
+#main-menu .ground {
+  display: none;
 }
 
 /* Sunset */
