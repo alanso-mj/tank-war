@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#17131a">
+  <title>TANK WAR</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <main id="app">
+
+    <!-- MAIN MENU -->
+    <section id="main-menu" class="screen active">
+      <div class="sun"></div>
+      <div class="mountain mountain-back"></div>
+      <div class="mountain mountain-front"></div>
+
+      <div class="menu-panel">
+        <div class="logo">
+          <span>TANK</span>
+          <span class="logo-orange">WAR</span>
+          <span class="logo-tank">▰</span>
+        </div>
+
+        <p class="subtitle">READY FOR BATTLE?</p>
+
+        <div class="menu-buttons">
+          <button id="play-btn" class="menu-btn">PLAY</button>
+          <button id="settings-btn" class="menu-btn">SETTINGS</button>
+          <button id="how-btn" class="menu-btn">HOW TO PLAY</button>
+        </div>
+
+        <p class="version">TANK WAR • VERSION 2.0</p>
+      </div>
+
+      <div class="tank tank-blue">
+        <div class="barrel"></div>
+        <div class="turret"></div>
+        <div class="hull"></div>
+        <div class="tracks"></div>
+        <div class="track-wheel"></div>
+        <div class="track-wheel wheel-two"></div>
+        <div class="track-wheel wheel-three"></div>
+      </div>
+
+      <div class="tank tank-red">
+        <div class="barrel"></div>
+        <div class="turret"></div>
+        <div class="hull"></div>
+        <div class="tracks"></div>
+        <div class="track-wheel"></div>
+        <div class="track-wheel wheel-two"></div>
+        <div class="track-wheel wheel-three"></div>
+      </div>
+
+      <div class="hill hill-left"></div>
+      <div class="hill hill-right"></div>
+      <div class="ground"></div>
+    </section>
+
+    <!-- GAME MODE -->
+    <section id="mode-screen" class="screen">
+      <button class="back-btn" data-back="main-menu">← BACK</button>
+
+      <h1>CHOOSE YOUR MODE</h1>
+
+      <div class="mode-cards">
+        <button class="mode-card" id="local-btn">
+          <span class="mode-icon">⚔️</span>
+          <strong>LOCAL MATCH</strong>
+          <small>Battle on the same device</small>
+        </button>
+
+        <button class="mode-card" id="online-btn">
+          <span class="mode-icon">🌐</span>
+          <strong>ONLINE MATCH</strong>
+          <small>Battle using a room code</small>
+        </button>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings-screen" class="screen">
+      <button class="back-btn" data-back="main-menu">← BACK</button>
+      <h1>SETTINGS</h1>
+      <button id="sound-btn" class="menu-btn">SOUND: ON</button>
+    </section>
+
+    <!-- HOW TO PLAY -->
+    <section id="how-screen" class="screen">
+      <button class="back-btn" data-back="main-menu">← BACK</button>
+      <h1>HOW TO PLAY</h1>
+
+      <div class="instructions">
+        <p>🎯 Aim your cannon and adjust shot power.</p>
+        <p>🚀 Fire shells at your opponent.</p>
+        <p>💥 Explosions deal damage based on distance.</p>
+        <p>❤️ Each tank starts with 100 HP.</p>
+        <p>🏆 Reduce your opponent's HP to zero to win.</p>
+        <p>⏱️ No turn countdown timer.</p>
+      </div>
+    </section>
+
+    <!-- ONLINE PLACEHOLDER -->
+    <section id="online-screen" class="screen">
+      <button class="back-btn" data-back="mode-screen">← BACK</button>
+      <h1>ONLINE MATCH</h1>
+      <p class="notice">
+        Online multiplayer will be added in a later development stage.
+      </p>
+    </section>
+
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
