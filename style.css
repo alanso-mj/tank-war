@@ -572,3 +572,182 @@ button:focus-visible {
     animation-duration: 0.01ms !important;
   }
 }
+/* LOCAL MATCH SETUP */
+
+#local-setup-screen {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 22px;
+  overflow-y: auto;
+  background:
+    linear-gradient(#21151be8, #21151bf2),
+    url("./menu-bg.png") center / cover no-repeat;
+}
+
+#local-setup-screen > h1,
+#vs-screen > h1,
+#battle-screen > h1 {
+  color: #ffb64f;
+  font-size: clamp(26px, 5vw, 46px);
+  text-align: center;
+}
+
+#local-setup-screen > p,
+#vs-screen > p,
+#battle-screen > p {
+  text-align: center;
+  line-height: 1.5;
+}
+
+.player-setup {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: min(100%, 850px);
+}
+
+.player-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.player-panel h2 {
+  font-size: clamp(16px, 2.5vw, 24px);
+}
+
+.player-one {
+  border-color: #238ee8;
+}
+
+.player-two {
+  border-color: #ed4942;
+}
+
+.tank-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  margin-top: 6px;
+  border-radius: 12px;
+  background: #17121a;
+  font-size: 44px;
+}
+
+.blue-preview {
+  border: 2px solid #238ee8;
+}
+
+.red-preview {
+  border: 2px solid #ed4942;
+}
+
+.green-preview {
+  border: 2px solid #57bf70;
+}
+
+.orange-preview {
+  border: 2px solid #ff982f;
+}
+
+.setup-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+#setup-error {
+  color: #ff8a80;
+  text-align: center;
+}
+
+#vs-screen,
+#battle-screen {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 24px;
+  background:
+    linear-gradient(#21151be8, #21151bf2),
+    url("./menu-bg.png") center / cover no-repeat;
+}
+
+.versus-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 5vw, 70px);
+  width: 100%;
+}
+
+.versus-player {
+  min-width: 0;
+  text-align: center;
+}
+
+.versus-player h2 {
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+}
+
+.versus-text {
+  color: #ff982f;
+  font-size: clamp(30px, 7vw, 70px);
+  font-weight: 900;
+  font-style: italic;
+}
+
+@media (orientation: portrait) {
+  #local-setup-screen {
+    justify-content: flex-start;
+  }
+
+  .player-setup {
+    grid-template-columns: 1fr;
+    max-width: 420px;
+  }
+
+  .tank-preview {
+    min-height: 60px;
+  }
+
+  #vs-screen,
+  #battle-screen {
+    overflow-y: auto;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  #local-setup-screen {
+    justify-content: flex-start;
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .player-setup {
+    width: min(100%, 850px);
+    gap: 10px;
+  }
+
+  .player-panel {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .tank-preview {
+    min-height: 45px;
+    font-size: 30px;
+  }
+
+  #vs-screen,
+  #battle-screen {
+    gap: 10px;
+    padding: 12px;
+  }
+}
