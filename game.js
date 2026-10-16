@@ -1029,7 +1029,7 @@
         const vx =
             direction * velocity * Math.cos(angle);
 
-        const vy =
+        let vy =
             -velocity * Math.sin(angle);
 
         const projectile = createProjectile(startX, startY);
