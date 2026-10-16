@@ -734,7 +734,20 @@ h1 {
 }
 
 /* Red tank colour refinement */
-.tank-red {
+.tank-red{
+/* NEW MENU BACKGROUND */
+#main-menu {
+  background: url("./menu-bg.png") center center / cover no-repeat !important;
+}
+
+#main-menu .sun,
+#main-menu .mountain,
+#main-menu .mountain-back,
+#main-menu .mountain-front,
+#main-menu .hill,
+#main-menu .ground {
+  display: none !important;
+}
   --tank-color: #ed4942;
   --tank-dark: #862c32;
   --tank-light: #ffac86;
