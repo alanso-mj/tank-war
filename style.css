@@ -734,49 +734,6 @@ img {
 
 /* Draggable cannon */
 
-.tank-cannon {
-    position: absolute;
-    z-index: 3;
-    top: 39%;
-    left: 50%;
-    width: 35px;
-    height: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.6);
-    border-radius: 2px 6px 6px 2px;
-    background: linear-gradient(
-        180deg,
-        #dce5ec 0%,
-        #6d7c8c 45%,
-        #354252 100%
-    );
-    transform-origin: left center;
-    cursor: grab;
-    pointer-events: auto;
-    touch-action: none;
-}
-
-.tank-cannon::before {
-    content: "";
-    position: absolute;
-    inset: -14px -7px;
-    background: transparent;
-}
-
-.tank-cannon::after {
-    content: "";
-    position: absolute;
-    top: 1px;
-    right: 2px;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: #222b37;
-}
-
-.tank-cannon:active {
-    cursor: grabbing;
-}
-
 .tank-nameplate {
     position: absolute;
     top: 100%;
