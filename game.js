@@ -1644,15 +1644,15 @@
             }
         );
 
-        elements.tank1Cannon.addEventListener(
-            "pointerdown",
-            event => beginAimDrag(event, 0)
-        );
+    elements.tank1Image.addEventListener(
+    "pointerdown",
+    event => beginAimDrag(event, 0)
+);
 
-        elements.tank2Cannon.addEventListener(
-            "pointerdown",
-            event => beginAimDrag(event, 1)
-        );
+elements.tank2Image.addEventListener(
+    "pointerdown",
+    event => beginAimDrag(event, 1)
+);
 
         window.addEventListener(
             "pointermove",
