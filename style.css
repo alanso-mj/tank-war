@@ -1,0 +1,589 @@
+/* =================================
+   TANK WAR V2 — MAIN DESIGN
+================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --orange: #ff8a24;
+  --orange-light: #ffb347;
+  --dark: #211820;
+  --white: #fff8ed;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  background: #211820;
+  color: var(--white);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  position: relative;
+}
+
+.screen {
+  display: none;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.screen.active {
+  display: flex;
+}
+
+/* =================================
+   MAIN MENU
+================================= */
+
+#main-menu {
+  background:
+    linear-gradient(
+      180deg,
+      #542d4a 0%,
+      #b84c4b 28%,
+      #ff9149 55%,
+      #ffbd67 75%,
+      #9a4935 100%
+    );
+}
+
+/* Sunset */
+
+.sun {
+  position: absolute;
+  width: 27vmin;
+  height: 27vmin;
+  max-width: 220px;
+  max-height: 220px;
+  border-radius: 50%;
+  background: #ffdc91;
+  box-shadow: 0 0 65px #ffb15a99;
+  top: 8%;
+  right: 22%;
+}
+
+/* Distant mountains */
+
+.mountain {
+  position: absolute;
+  width: 120%;
+  left: -10%;
+  bottom: 23%;
+  height: 48%;
+  background: #a64e48;
+  clip-path: polygon(
+    0 85%,
+    12% 48%,
+    23% 70%,
+    36% 22%,
+    49% 68%,
+    64% 34%,
+    77% 66%,
+    90% 28%,
+    100% 65%,
+    100% 100%,
+    0 100%
+  );
+}
+
+.mountain-back {
+  background: #c56a53;
+  bottom: 25%;
+  opacity: 0.8;
+}
+
+.mountain-front {
+  background: #87423d;
+  bottom: 16%;
+  height: 36%;
+  transform: scaleX(-1);
+}
+
+/* Ground */
+
+.ground {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 25%;
+  background: linear-gradient(
+    180deg,
+    #d77a3d,
+    #71372e
+  );
+  clip-path: polygon(
+    0 25%,
+    15% 12%,
+    31% 35%,
+    48% 18%,
+    66% 33%,
+    82% 10%,
+    100% 26%,
+    100% 100%,
+    0 100%
+  );
+  z-index: 2;
+}
+
+/* =================================
+   MENU PANEL
+================================= */
+
+.menu-panel {
+  position: absolute;
+  z-index: 10;
+  left: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38%;
+  max-width: 430px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.18em;
+  font-size: clamp(34px, 6vw, 76px);
+  font-weight: 1000;
+  line-height: 0.95;
+  letter-spacing: -3px;
+  color: #fff9ed;
+  text-shadow:
+    3px 4px 0 #4a2b2a,
+    5px 7px 0 #281c20;
+}
+
+.logo-orange {
+  color: #ff9a36;
+}
+
+.logo-tank {
+  color: #fff2d3;
+  font-size: 0.75em;
+  margin-left: 5px;
+}
+
+.subtitle {
+  margin-top: 16px;
+  margin-bottom: 22px;
+  font-size: clamp(9px, 1.4vw, 14px);
+  letter-spacing: 3px;
+  font-weight: 800;
+  color: #ffe0b5;
+}
+
+/* =================================
+   BUTTONS
+================================= */
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  width: 85%;
+  max-width: 300px;
+}
+
+.menu-btn {
+  min-height: 43px;
+  padding: 12px 20px;
+  border: 2px solid #ffd09b;
+  border-radius: 5px;
+  background: linear-gradient(
+    180deg,
+    #ffad48,
+    #ed7025
+  );
+  color: white;
+  font-size: clamp(12px, 1.6vw, 17px);
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-align: center;
+  box-shadow: 0 5px 0 #803d2b;
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease;
+}
+
+.menu-btn:hover {
+  filter: brightness(1.12);
+}
+
+.menu-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #803d2b;
+}
+
+.version {
+  margin-top: 24px;
+  color: #f9c9a0;
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+
+/* =================================
+   CARTOON TANKS
+================================= */
+
+.tank {
+  position: absolute;
+  z-index: 4;
+  width: 23%;
+  height: 20%;
+  min-height: 75px;
+}
+
+/* Tank positions */
+
+.tank-blue {
+  left: 47%;
+  bottom: 23%;
+  --tank-color: #248de2;
+  --tank-dark: #174d86;
+  --tank-light: #73c9ff;
+}
+
+.tank-red {
+  right: 5%;
+  bottom: 29%;
+  --tank-color: #ed4942;
+  --tank-dark: #8c292c;
+  --tank-light: #ff9b73;
+  transform: scaleX(-1);
+}
+
+/* Tank body */
+
+.hull {
+  position: absolute;
+  width: 85%;
+  height: 39%;
+  left: 7%;
+  bottom: 20%;
+  border: 3px solid var(--tank-dark);
+  border-radius: 12px 16px 5px 5px;
+  background: linear-gradient(
+    180deg,
+    var(--tank-light),
+    var(--tank-color) 55%,
+    var(--tank-dark)
+  );
+  box-shadow: inset 0 -5px 0 #00000022;
+}
+
+.turret {
+  position: absolute;
+  width: 43%;
+  height: 32%;
+  left: 25%;
+  bottom: 54%;
+  border: 3px solid var(--tank-dark);
+  border-radius: 15px 15px 5px 5px;
+  background: linear-gradient(
+    180deg,
+    var(--tank-light),
+    var(--tank-color)
+  );
+  z-index: 2;
+}
+
+.barrel {
+  position: absolute;
+  width: 42%;
+  height: 10%;
+  left: 60%;
+  bottom: 64%;
+  border: 2px solid var(--tank-dark);
+  border-radius: 0 4px 4px 0;
+  background: var(--tank-color);
+  z-index: 1;
+}
+
+/* Tracks */
+
+.tracks {
+  position: absolute;
+  left: 3%;
+  bottom: 8%;
+  width: 93%;
+  height: 27%;
+  border: 4px solid #30282b;
+  border-radius: 20px;
+  background: #55454a;
+}
+
+.track-wheel {
+  position: absolute;
+  width: 15%;
+  aspect-ratio: 1;
+  left: 15%;
+  bottom: 12%;
+  z-index: 2;
+  border: 3px solid #30282b;
+  border-radius: 50%;
+  background: var(--tank-light);
+}
+
+.wheel-two {
+  left: 41%;
+}
+
+.wheel-three {
+  left: 67%;
+}
+
+/* =================================
+   HILLS
+================================= */
+
+.hill {
+  position: absolute;
+  bottom: 0;
+  width: 55%;
+  height: 34%;
+  z-index: 3;
+  background: linear-gradient(
+    180deg,
+    #e99a4d,
+    #b85d36
+  );
+}
+
+.hill-left {
+  left: -15%;
+  border-radius: 50% 50% 0 0;
+  transform: rotate(-5deg);
+}
+
+.hill-right {
+  right: -15%;
+  height: 39%;
+  border-radius: 50% 50% 0 0;
+  transform: rotate(5deg);
+}
+
+/* =================================
+   OTHER SCREENS
+================================= */
+
+#mode-screen,
+#settings-screen,
+#how-screen,
+#online-screen {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 30px;
+  text-align: center;
+  background:
+    linear-gradient(
+      180deg,
+      #522e40,
+      #c45f43,
+      #ef9a50
+    );
+}
+
+h1 {
+  font-size: clamp(22px, 4vw, 42px);
+  font-weight: 1000;
+  letter-spacing: 2px;
+  color: #fff4df;
+  text-shadow: 2px 3px 0 #5d302c;
+}
+
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  padding: 10px 16px;
+  border: 1px solid #ffd19d;
+  border-radius: 4px;
+  color: white;
+  background: #693a37;
+  font-weight: bold;
+}
+
+/* Mode cards */
+
+.mode-cards {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  width: min(700px, 90%);
+}
+
+.mode-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  flex: 1;
+  min-height: 180px;
+  padding: 22px 12px;
+  border: 2px solid #ffd09b;
+  border-radius: 7px;
+  color: white;
+  background: linear-gradient(
+    180deg,
+    #e98a38,
+    #a74d34
+  );
+  box-shadow: 0 6px 0 #65332d;
+}
+
+.mode-card:active {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 #65332d;
+}
+
+.mode-icon {
+  font-size: clamp(30px, 5vw, 48px);
+}
+
+.mode-card strong {
+  font-size: clamp(13px, 2vw, 20px);
+}
+
+.mode-card small {
+  font-size: clamp(10px, 1.4vw, 13px);
+  color: #ffe4c4;
+}
+
+/* Instructions */
+
+.instructions {
+  width: min(620px, 95%);
+  padding: 20px;
+  border: 1px solid #ffd09b;
+  border-radius: 8px;
+  background: #472d35bb;
+  text-align: left;
+}
+
+.instructions p {
+  margin: 13px 0;
+  font-size: clamp(12px, 1.7vw, 17px);
+  line-height: 1.5;
+}
+
+.notice {
+  max-width: 480px;
+  padding: 20px;
+  line-height: 1.6;
+  background: #472d35bb;
+  border-radius: 8px;
+}
+
+/* =================================
+   SMALL SCREEN ADJUSTMENTS
+================================= */
+
+@media (max-width: 600px) {
+  .menu-panel {
+    left: 4%;
+    width: 44%;
+  }
+
+  .logo {
+    letter-spacing: -2px;
+  }
+
+  .menu-buttons {
+    width: 100%;
+  }
+
+  .menu-btn {
+    min-height: 37px;
+    padding: 9px 8px;
+    letter-spacing: 1px;
+  }
+
+  .tank {
+    width: 30%;
+    height: 17%;
+  }
+
+  .tank-blue {
+    left: 43%;
+  }
+
+  .tank-red {
+    right: 1%;
+  }
+
+  .mode-cards {
+    width: 100%;
+    gap: 12px;
+  }
+
+  .mode-card {
+    min-height: 150px;
+    padding: 12px 7px;
+  }
+
+  #mode-screen,
+  #settings-screen,
+  #how-screen,
+  #online-screen {
+    padding: 20px;
+  }
+}
+
+/* Landscape phone support */
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .menu-panel {
+    top: 48%;
+  }
+
+  .subtitle {
+    margin-top: 9px;
+    margin-bottom: 12px;
+  }
+
+  .menu-buttons {
+    gap: 7px;
+  }
+
+  .menu-btn {
+    min-height: 32px;
+    padding: 7px 12px;
+  }
+
+  .version {
+    margin-top: 13px;
+  }
+
+  .tank-blue {
+    bottom: 20%;
+  }
+
+  .tank-red {
+    bottom: 25%;
+  }
+  }
