@@ -1,392 +1,1454 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#17243a">
-  <title>Tank War — Desert Showdown</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0,
+        maximum-scale=1.0, user-scalable=no"
+    >
+
+    <meta name="theme-color" content="#151b2b">
+
+    <meta
+        name="description"
+        content="Tank War — a colourful 2D tank artillery battle."
+    >
+
+    <title>Tank War</title>
+
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Game engine -->
+    <script src="game.js" defer></script>
 </head>
+
 <body>
 
-  <div id="rotate-notice" class="rotate-notice">
-    <div class="rotate-icon">↻</div>
-    <h2>Rotate your device</h2>
-    <p>Tank War is designed for landscape play.</p>
-  </div>
+    <!-- ==================================================
+         LANDSCAPE ORIENTATION WARNING
+    =================================================== -->
 
-  <main id="app">
+    <div id="rotate-screen" class="orientation-screen">
+        <div class="rotate-content">
+            <div class="rotate-icon" aria-hidden="true">📱</div>
 
-    <!-- MAIN MENU -->
-    <section id="menu-screen" class="screen active">
-      <div class="menu-backdrop"></div>
-      <div class="sun"></div>
+            <h1>ROTATE YOUR DEVICE</h1>
 
-      <header class="menu-top">
-        <div class="brand-mark">TW</div>
-        <div class="brand-title">
-          <div class="eyebrow">ARCADE TANK BATTLES</div>
-          <h1>TANK <span>WAR</span></h1>
+            <p>
+                Tank War is designed for landscape gameplay.
+                Turn your phone sideways to continue.
+            </p>
         </div>
-        <div class="build-tag">DESERT SHOWDOWN</div>
-      </header>
-
-      <div class="menu-layout">
-        <div class="hero-art">
-          <div class="hero-sun"></div>
-          <div class="hero-mountain m1"></div>
-          <div class="hero-mountain m2"></div>
-          <div class="hero-dune"></div>
-
-          <div class="hero-tank">
-            <div class="hero-track"></div>
-            <div class="hero-hull"></div>
-            <div class="hero-turret"></div>
-            <div class="hero-barrel"></div>
-            <div class="hero-star">★</div>
-          </div>
-
-          <div class="dust dust1"></div>
-          <div class="dust dust2"></div>
-        </div>
-
-        <div class="menu-card">
-          <div class="card-kicker">READY FOR BATTLE?</div>
-
-          <label for="player-name">YOUR CALLSIGN</label>
-          <input
-            id="player-name"
-            maxlength="16"
-            placeholder="Desert Ace"
-            value="Desert Ace"
-            autocomplete="off"
-          >
-
-          <button id="play-btn" class="primary-btn">
-            ENTER THE BATTLE <span>➜</span>
-          </button>
-
-          <button id="howto-btn" class="secondary-btn">
-            HOW TO PLAY
-          </button>
-
-          <div class="menu-foot">
-            <span class="online-dot"></span>
-            LOCAL BATTLE READY
-            <span class="version">v1.0</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="bottom-note">
-        AIM TRUE. FIRE HARD. OWN THE DESERT.
-      </div>
-    </section>
-
-
-    <!-- TANK SELECTION -->
-    <section id="setup-screen" class="screen">
-
-      <header class="sub-header">
-        <button class="icon-btn" data-screen="menu-screen" aria-label="Back">←</button>
-        <div>
-          <div class="eyebrow">BATTLE CONFIGURATION</div>
-          <h2>CHOOSE YOUR TANKS</h2>
-        </div>
-        <span class="step-chip">01 / 02</span>
-      </header>
-
-      <div class="setup-grid">
-
-        <!-- BLUE TEAM -->
-        <article class="tank-card blue-card">
-          <div class="team-label blue-label">
-            PLAYER 1 <span>BLUE TEAM</span>
-          </div>
-
-          <div class="tank-preview blue-preview">
-            <div class="preview-ground"></div>
-            <div class="preview-tank">
-              <div class="preview-track"></div>
-              <div class="preview-hull"></div>
-              <div class="preview-turret"></div>
-              <div class="preview-barrel"></div>
-              <div class="preview-star">★</div>
-            </div>
-          </div>
-
-          <div id="blue-tank-name" class="tank-name">SCOUT</div>
-          <div id="blue-tank-desc" class="tank-desc">Quick and balanced</div>
-
-          <div class="tank-options">
-            <button id="blue-prev" class="arrow-btn" aria-label="Previous blue tank">‹</button>
-            <div id="blue-dots" class="tank-dots"></div>
-            <button id="blue-next" class="arrow-btn" aria-label="Next blue tank">›</button>
-          </div>
-        </article>
-
-        <div class="versus">VS</div>
-
-        <!-- RED TEAM -->
-        <article class="tank-card red-card">
-          <div class="team-label red-label">
-            PLAYER 2 <span>RED TEAM</span>
-          </div>
-
-          <div class="tank-preview red-preview">
-            <div class="preview-ground"></div>
-            <div class="preview-tank">
-              <div class="preview-track"></div>
-              <div class="preview-hull"></div>
-              <div class="preview-turret"></div>
-              <div class="preview-barrel"></div>
-              <div class="preview-star">★</div>
-            </div>
-          </div>
-
-          <div id="red-tank-name" class="tank-name">BRUISER</div>
-          <div id="red-tank-desc" class="tank-desc">Heavy armour</div>
-
-          <div class="tank-options">
-            <button id="red-prev" class="arrow-btn" aria-label="Previous red tank">‹</button>
-            <div id="red-dots" class="tank-dots"></div>
-            <button id="red-next" class="arrow-btn" aria-label="Next red tank">›</button>
-          </div>
-        </article>
-
-      </div>
-
-      <footer class="setup-footer">
-        <div class="setup-tip">⚡ Take turns. Aim carefully. Watch the wind!</div>
-        <button id="start-btn" class="primary-btn">
-          START BATTLE <span>➜</span>
-        </button>
-      </footer>
-
-    </section>
-
-
-    <!-- BATTLE SCREEN -->
-    <section id="battle-screen" class="screen battle-screen">
-
-      <header class="battle-topbar">
-
-        <div class="battle-player blue-hud">
-          <div class="avatar">P1</div>
-          <div class="hud-info">
-            <strong id="hud-blue-name">PLAYER 1</strong>
-            <div class="health-track">
-              <div id="blue-health" class="health-fill blue-fill"></div>
-            </div>
-            <small id="blue-hp">100 / 100 HP</small>
-          </div>
-        </div>
-
-        <div class="battle-center">
-          <div class="battle-logo">TANK <span>WAR</span></div>
-          <div id="turn-label" class="turn-label">BLUE'S TURN</div>
-          <div id="wind-label" class="wind-label">WIND → 0</div>
-        </div>
-
-        <div class="battle-player red-hud">
-          <div class="hud-info">
-            <strong id="hud-red-name">PLAYER 2</strong>
-            <div class="health-track">
-              <div id="red-health" class="health-fill red-fill"></div>
-            </div>
-            <small id="red-hp">100 / 100 HP</small>
-          </div>
-          <div class="avatar red-avatar">P2</div>
-        </div>
-
-        <button id="pause-btn" class="pause-btn" aria-label="Pause game">Ⅱ</button>
-      </header>
-
-      <div id="battlefield" class="battlefield">
-        <div class="sky-sun"></div>
-        <div class="sky-cloud cloud-a"></div>
-        <div class="sky-cloud cloud-b"></div>
-        <div class="far-ridge"></div>
-        <div class="mid-ridge"></div>
-
-        <canvas id="terrain-canvas"></canvas>
-        <canvas id="fx-canvas"></canvas>
-
-        <div id="tank-blue" class="battle-tank blue-tank">
-          <div class="tank-tracks"></div>
-          <div class="tank-body">
-            <div class="tank-mark">★</div>
-          </div>
-          <div class="tank-turret">
-            <div class="tank-barrel"></div>
-          </div>
-        </div>
-
-        <div id="tank-red" class="battle-tank red-tank">
-          <div class="tank-tracks"></div>
-          <div class="tank-body">
-            <div class="tank-mark">★</div>
-          </div>
-          <div class="tank-turret">
-            <div class="tank-barrel"></div>
-          </div>
-        </div>
-
-        <div id="battle-toast" class="battle-toast"></div>
-        <div class="battlefield-hint">DRAG TO AIM</div>
-      </div>
-
-      <div class="control-deck">
-
-        <div class="move-panel">
-          <div class="control-title">
-            MOVE TANK <span>← →</span>
-          </div>
-          <div class="move-buttons">
-            <button id="left-btn" class="control-btn" aria-label="Move left">◀</button>
-            <div id="move-meter" class="move-meter">MOVE</div>
-            <button id="right-btn" class="control-btn" aria-label="Move right">▶</button>
-          </div>
-        </div>
-
-        <div class="aim-panel">
-          <div class="control-title">
-            AIM &amp; POWER <span id="aim-readout">45°</span>
-          </div>
-
-          <div class="aim-row">
-            <label for="angle-slider">
-              ANGLE <strong id="angle-value">45°</strong>
-            </label>
-            <input id="angle-slider" type="range" min="10" max="80" value="45">
-
-            <label for="power-slider">
-              POWER <strong id="power-value">65%</strong>
-            </label>
-            <input id="power-slider" type="range" min="25" max="100" value="65">
-          </div>
-
-          <div class="aim-help">Use sliders or drag across the battlefield</div>
-        </div>
-
-        <div class="fire-panel">
-          <div class="control-title">YOUR MOVE</div>
-          <button id="fire-btn" class="fire-btn"><span>✦</span> FIRE!</button>
-        </div>
-
-      </div>
-    </section>    <!-- VICTORY SCREEN -->
-    <section id="result-screen" class="screen result-screen">
-      <div class="result-sparks">✦　✧　✦</div>
-      <div class="result-badge">★</div>
-      <div class="eyebrow">BATTLE COMPLETE</div>
-      <h2 id="result-title">VICTORY!</h2>
-      <div id="result-winner" class="result-winner">BLUE TEAM WINS</div>
-      <p id="result-subtitle">The desert belongs to you.</p>
-
-      <div class="result-actions">
-        <button id="rematch-btn" class="primary-btn">REMATCH ↻</button>
-        <button id="menu-btn" class="secondary-btn">MAIN MENU</button>
-      </div>
-    </section>
-
-
-    <!-- HOW TO PLAY -->
-    <section id="howto-screen" class="screen">
-      <header class="sub-header">
-        <button class="icon-btn" data-screen="menu-screen" aria-label="Back">←</button>
-        <div>
-          <div class="eyebrow">FIELD MANUAL</div>
-          <h2>HOW TO PLAY</h2>
-        </div>
-      </header>
-
-      <div class="instructions-panel">
-        <div class="instruction-item">
-          <div class="instruction-number">01</div>
-          <div>
-            <h3>MOVE</h3>
-            <p>Use the left and right buttons to reposition your tank.</p>
-          </div>
-        </div>
-
-        <div class="instruction-item">
-          <div class="instruction-number">02</div>
-          <div>
-            <h3>AIM</h3>
-            <p>Adjust your firing angle with the slider or drag on the battlefield.</p>
-          </div>
-        </div>
-
-        <div class="instruction-item">
-          <div class="instruction-number">03</div>
-          <div>
-            <h3>SET POWER</h3>
-            <p>Higher power sends your shell farther. Wind can affect its path.</p>
-          </div>
-        </div>
-
-        <div class="instruction-item">
-          <div class="instruction-number">04</div>
-          <div>
-            <h3>FIRE</h3>
-            <p>Take turns. Hit the opposing tank and reduce its health to zero.</p>
-          </div>
-        </div>
-
-        <div class="instruction-item">
-          <div class="instruction-number">05</div>
-          <div>
-            <h3>USE THE TERRAIN</h3>
-            <p>Uneven hills change your shot. Aim carefully and use the landscape.</p>
-          </div>
-        </div>
-
-        <button id="howto-back-btn" class="primary-btn">
-          GOT IT — LET'S PLAY!
-        </button>
-      </div>
-    </section>
-
-  </main>
-
-
-  <!-- PAUSE MENU -->
-  <div id="pause-overlay" class="overlay" aria-hidden="true">
-    <div class="overlay-card">
-      <div class="eyebrow">TAKE A BREATHER</div>
-      <h2>GAME PAUSED</h2>
-
-      <button id="resume-btn" class="primary-btn">RESUME BATTLE</button>
-      <button id="restart-btn" class="secondary-btn">RESTART BATTLE</button>
-      <button id="leave-btn" class="text-btn">LEAVE MATCH</button>
     </div>
-  </div>
 
 
-  <!-- CONFIRMATION DIALOG -->
-  <div id="confirm-overlay" class="overlay" aria-hidden="true">
-    <div class="overlay-card">
-      <div class="eyebrow">CONFIRM ACTION</div>
-      <h2 id="confirm-title">LEAVE BATTLE?</h2>
-      <p id="confirm-message">Your current match will end.</p>
+    <!-- ==================================================
+         GAME APPLICATION
+    =================================================== -->
 
-      <div class="confirm-actions">
-        <button id="confirm-yes-btn" class="primary-btn">YES</button>
-        <button id="confirm-cancel-btn" class="secondary-btn">CANCEL</button>
-      </div>
-    </div>
-  </div>
+    <main id="game-app">
+
+        <!-- GLOBAL NOTIFICATION -->
+        <div
+            id="global-notice"
+            class="global-notice"
+            role="status"
+            aria-live="polite"
+        ></div>
 
 
-  <!-- GLOBAL NOTIFICATIONS -->
-  <div
-    id="global-notice"
-    class="global-notice"
-    role="status"
-    aria-live="polite"
-  ></div>
+        <!-- ==================================================
+             MAIN MENU
+        =================================================== -->
 
-  <script src="game.js"></script>
+        <section
+            id="main-menu"
+            class="screen main-menu active"
+            aria-label="Main menu"
+        >
+
+            <div class="menu-background"></div>
+            <div class="menu-overlay"></div>
+
+            <div class="menu-topbar">
+
+                <div class="brand">
+                    <span class="brand-icon">⚔</span>
+
+                    <span class="brand-name">
+                        TANK <strong>WAR</strong>
+                    </span>
+                </div>
+
+                <button
+                    id="menu-settings-btn"
+                    class="icon-button"
+                    type="button"
+                    aria-label="Open settings"
+                >
+                    ⚙
+                </button>
+
+            </div>
+
+
+            <div class="menu-layout">
+
+                <!-- LEFT: MENU CONTROLS -->
+                <div class="menu-panel">
+
+                    <div class="menu-eyebrow">
+                        ARMOURED COMBAT
+                    </div>
+
+                    <h1 class="game-logo">
+                        TANK<br>
+                        <span>WAR</span>
+                    </h1>
+
+                    <p class="menu-subtitle">
+                        AIM. FIRE. DOMINATE.
+                    </p>
+
+                    <div class="menu-buttons">
+
+                        <button
+                            id="play-btn"
+                            class="game-button primary-button"
+                            type="button"
+                        >
+                            <span class="button-icon">▶</span>
+                            <span>PLAY</span>
+                        </button>
+
+                        <button
+                            id="online-btn"
+                            class="game-button online-button"
+                            type="button"
+                        >
+                            <span class="button-icon">◎</span>
+                            <span>ONLINE BATTLE</span>
+                        </button>
+
+                        <button
+                            id="resume-match-btn"
+                            class="game-button secondary-button hidden"
+                            type="button"
+                        >
+                            RESUME MATCH
+                        </button>
+
+                        <button
+                            id="menu-settings-secondary-btn"
+                            class="game-button secondary-button"
+                            type="button"
+                        >
+                            SETTINGS
+                        </button>
+
+                    </div>
+
+                    <div class="menu-footer">
+                        TWO TANKS. ONE WINNER.
+                    </div>
+
+                </div>
+
+
+                <!-- RIGHT: DECORATIVE TANK COMPOSITION -->
+                <div
+                    class="menu-showcase"
+                    aria-label="Blue and red tanks facing each other"
+                >
+                    <div class="showcase-sun"></div>
+
+                    <div class="showcase-tank showcase-blue">
+                        <img
+                            src="tank-blue.png"
+                            alt="Blue tank"
+                            class="tank-art"
+                            draggable="false"
+                        >
+                    </div>
+
+                    <div class="showcase-tank showcase-red">
+                        <img
+                            src="tank-red.png"
+                            alt="Red tank"
+                            class="tank-art"
+                            draggable="false"
+                        >
+                    </div>
+
+                    <div class="showcase-label">
+                        <span class="showcase-dot blue-dot"></span>
+                        BLUE
+                        <span class="showcase-divider">VS</span>
+                        RED
+                        <span class="showcase-dot red-dot"></span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="menu-version">
+                TANK WAR · ARMOURED COMBAT
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             GAME MODE SELECTION
+        =================================================== -->
+
+        <section
+            id="mode-screen"
+            class="screen secondary-screen"
+            aria-label="Choose game mode"
+        >
+
+            <header class="screen-header">
+
+                <button
+                    class="back-button"
+                    type="button"
+                    data-action="back-to-menu"
+                >
+                    ← BACK
+                </button>
+
+                <div class="screen-brand">
+                    TANK <strong>WAR</strong>
+                </div>
+
+                <div class="header-spacer"></div>
+
+            </header>
+
+
+            <div class="screen-content">
+
+                <div class="section-heading">
+                    <span class="section-eyebrow">
+                        CHOOSE YOUR BATTLE
+                    </span>
+
+                    <h1>SELECT MODE</h1>
+
+                    <p>
+                        Choose how you want to fight.
+                    </p>
+                </div>
+
+
+                <div class="mode-grid">
+
+                    <button
+                        id="local-mode-btn"
+                        class="mode-card local-mode-card"
+                        type="button"
+                    >
+                        <span class="mode-card-icon">⚔</span>
+
+                        <span class="mode-card-title">
+                            LOCAL BATTLE
+                        </span>
+
+                        <span class="mode-card-description">
+                            Two players, one device.
+                        </span>
+
+                        <span class="mode-card-action">
+                            PLAY LOCALLY →
+                        </span>
+                    </button>
+
+
+                    <button
+                        id="online-mode-btn"
+                        class="mode-card online-mode-card"
+                        type="button"
+                    >
+                        <span class="mode-card-icon">🌐</span>
+
+                        <span class="mode-card-title">
+                            ONLINE BATTLE
+                        </span>
+
+                        <span class="mode-card-description">
+                            Challenge another player online.
+                        </span>
+
+                        <span class="mode-card-action">
+                            ENTER ONLINE →
+                        </span>
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             TANK SELECTION AND PLAYER SETUP
+        =================================================== -->
+
+        <section
+            id="setup-screen"
+            class="screen secondary-screen"
+            aria-label="Player and tank selection"
+        >
+
+            <header class="screen-header">
+
+                <button
+                    class="back-button"
+                    type="button"
+                    data-action="back-to-mode"
+                >
+                    ← BACK
+                </button>
+
+                <div class="screen-brand">
+                    TANK <strong>WAR</strong>
+                </div>
+
+                <div class="header-spacer"></div>
+
+            </header>
+
+
+            <div class="screen-content setup-content">
+
+                <div class="section-heading">
+                    <span class="section-eyebrow">
+                        PREPARE FOR COMBAT
+                    </span>
+
+                    <h1>CHOOSE YOUR TANKS</h1>
+
+                    <p>
+                        Both players have equal combat abilities.
+                    </p>
+                </div>
+
+
+                <div class="player-selection-grid">
+
+                    <!-- PLAYER 1 -->
+                    <article class="player-card blue-player-card">
+
+                        <div class="player-card-heading">
+                            <span class="player-colour blue-colour"></span>
+
+                            <h2>PLAYER 1</h2>
+
+                            <span class="player-side-label">
+                                BLUE TEAM
+                            </span>
+                        </div>
+
+                        <label for="player1-name">
+                            PLAYER NAME
+                        </label>
+
+                        <input
+                            id="player1-name"
+                            class="name-input"
+                            type="text"
+                            maxlength="18"
+                            value="BLUE"
+                            autocomplete="off"
+                            placeholder="Enter player name"
+                        >
+
+                        <div class="tank-preview">
+                            <img
+                                id="player1-tank-preview"
+                                src="tank-blue.png"
+                                alt="Player 1 tank preview"
+                                draggable="false"
+                            >
+                        </div>
+
+                        <label for="player1-tank">
+                            SELECT TANK
+                        </label>
+
+                        <select
+                            id="player1-tank"
+                            class="tank-select"
+                        >
+                            <option value="0">STRIKER</option>
+                            <option value="1">TITAN</option>
+                            <option value="2">SCOUT</option>
+                        </select>
+
+                        <div class="tank-stat-panel">
+
+                            <div class="tank-stat">
+                                <span>HEALTH</span>
+                                <strong>100 HP</strong>
+                            </div>
+
+                            <div class="tank-stat">
+                                <span>SPEED</span>
+                                <strong>EQUAL</strong>
+                            </div>
+
+                            <div class="tank-stat">
+                                <span>POWER</span>
+                                <strong>EQUAL</strong>
+                            </div>
+
+                            <div class="tank-stat">
+                                <span>ARMOUR</span>
+                                <strong>EQUAL</strong>
+                            </div>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- VERSUS -->
+                    <div class="setup-versus">
+                        <span>VS</span>
+                    </div>
+
+
+                    <!-- PLAYER 2 -->
+                    <article class="player-card red-player-card">
+
+                        <div class="player-card-heading">
+                            <span class="player-colour red-colour"></span>
+
+                            <h2>PLAYER 2</h2>
+
+                            <span class="player-side-label">
+                                RED TEAM
+                            </span>
+                        </div>
+
+                        <label for="player2-name">
+                            PLAYER NAME
+                        </label>
+
+                        <input
+                            id="player2-name"
+                            class="name-input"
+                            type="text"
+                            maxlength="18"
+                            value="RED"
+                            autocomplete="off"
+                            placeholder="Enter player name"
+                        >
+
+                        <div class="tank-preview">
+                            <img
+                                id="player2-tank-preview"
+                                src="tank-red.png"
+                                alt="Player 2 tank preview"
+                                draggable="false"
+                            >
+                        </div>
+
+                        <label for="player2-tank">
+                            SELECT TANK
+                        </label>
+
+                        <select
+                            id="player2-tank"
+                            class="tank-select"
+                        >
+                            <option value="0">STRIKER</option>
+                            <option value="1" selected>TITAN</option>
+                            <option value="2">SCOUT</option>
+                        </select>
+
+                        <div class="tank-stat-panel">
+
+                            <div class="tank-stat">
+                                <span>HEALTH</span>
+                                <strong>100 HP</strong>
+                            </div>
+
+                            <div class="tank-stat">
+                                <span>SPEED</span>
+                                <strong>EQUAL</strong>
+                            </div>
+
+                            <div class="tank-stat">
+                                <span>POWER</span>
+                                <strong>EQUAL</strong>
+                            </div>
+
+                            <div class="tank-stat">
+                                <span>ARMOUR</span>
+                                <strong>EQUAL</strong>
+                            </div>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <div class="setup-footer">
+
+                    <p class="fair-play-note">
+                        ⚖ Every tank has identical gameplay abilities.
+                    </p>
+
+                    <button
+                        id="start-match-btn"
+                        class="game-button primary-button start-match-button"
+                        type="button"
+                    >
+                        START BATTLE →
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             ONLINE MULTIPLAYER LOBBY
+        =================================================== -->
+
+        <section
+            id="online-screen"
+            class="screen secondary-screen"
+            aria-label="Online multiplayer"
+        >
+
+            <header class="screen-header">
+
+                <button
+                    class="back-button"
+                    type="button"
+                    data-action="back-to-menu"
+                >
+                    ← BACK
+                </button>
+
+                <div class="screen-brand">
+                    ONLINE <strong>BATTLE</strong>
+                </div>
+
+                <div class="header-spacer"></div>
+
+            </header>
+
+
+            <div class="screen-content">
+
+                <div class="section-heading">
+                    <span class="section-eyebrow">
+                        CONNECT AND COMPETE
+                    </span>
+
+                    <h1>ONLINE MULTIPLAYER</h1>
+
+                    <p>
+                        Create a room or join a friend's battle.
+                    </p>
+                </div>
+
+
+                <div class="online-panel">
+
+                    <div class="online-actions">
+
+                        <button
+                            id="create-room-btn"
+                            class="game-button primary-button"
+                            type="button"
+                        >
+                            CREATE ROOM
+                        </button>
+
+                        <div class="join-room-group">
+
+                            <label for="room-code-input">
+                                SIX-CHARACTER ROOM CODE
+                            </label>
+
+                            <input
+                                id="room-code-input"
+                                class="room-code-input"
+                                type="text"
+                                maxlength="6"
+                                minlength="6"
+                                autocomplete="off"
+                                placeholder="ABC123"
+                                aria-label="Six-character room code"
+                            >
+
+                            <button
+                                id="join-room-btn"
+                                class="game-button secondary-button"
+                                type="button"
+                            >
+                                JOIN ROOM
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        id="online-lobby"
+                        class="online-lobby hidden"
+                    >
+
+                        <div class="room-code-display">
+
+                            <span>YOUR ROOM CODE</span>
+
+                            <strong id="room-code-display">
+                                ------ 
+                            </strong>
+
+                            <button
+                                id="copy-room-code-btn"
+                                class="small-button"
+                                type="button"
+                            >
+                                COPY CODE
+                            </button>
+
+                            <button
+                                id="share-room-btn"
+                                class="small-button"
+                                type="button"
+                            >
+                                SHARE ROOM
+                            </button>
+
+                        </div>
+
+
+                        <div class="lobby-players">
+
+                            <div class="lobby-player">
+                                <span class="player-colour blue-colour"></span>
+
+                                <div>
+                                    <strong id="lobby-player1-name">
+                                        PLAYER 1
+                                    </strong>
+
+                                    <span id="lobby-player1-status">
+                                        WAITING
+                                    </span>
+                                </div>
+
+                                <span
+                                    id="lobby-player1-ready"
+                                    class="ready-indicator"
+                                >
+                                    NOT READY
+                                </span>
+                            </div>
+
+
+                            <div class="lobby-player">
+                                <span class="player-colour red-colour"></span>
+
+                                <div>
+                                    <strong id="lobby-player2-name">
+                                        PLAYER 2
+                                    </strong>
+
+                                    <span id="lobby-player2-status">
+                                        WAITING FOR PLAYER
+                                    </span>
+                                </div>
+
+                                <span
+                                    id="lobby-player2-ready"
+                                    class="ready-indicator"
+                                >
+                                    NOT READY
+                                </span>
+                            </div>
+
+                        </div>
+
+
+                        <div class="lobby-buttons">
+
+                            <button
+                                id="ready-btn"
+                                class="game-button primary-button"
+                                type="button"
+                            >
+                                READY
+                            </button>
+
+                            <button
+                                id="leave-room-btn"
+                                class="game-button secondary-button"
+                                type="button"
+                            >
+                                LEAVE ROOM
+                            </button>
+
+                        </div>
+
+                        <p
+                            id="online-connection-status"
+                            class="connection-status"
+                            role="status"
+                        >
+                            NOT CONNECTED
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             VERSUS INTRODUCTION
+        =================================================== -->
+
+        <section
+            id="vs-screen"
+            class="screen versus-screen"
+            aria-label="Versus introduction"
+        >
+
+            <div class="versus-content">
+
+                <span class="section-eyebrow">
+                    PREPARE FOR COMBAT
+                </span>
+
+                <h1>GET READY!</h1>
+
+                <div class="versus-players">
+
+                    <div class="versus-player blue-versus-player">
+
+                        <img
+                            src="tank-blue.png"
+                            alt=""
+                            draggable="false"
+                        >
+
+                        <strong id="vs-name1">BLUE</strong>
+
+                        <span>BLUE TEAM</span>
+
+                    </div>
+
+
+                    <div class="versus-logo">
+                        VS
+                    </div>
+
+
+                    <div class="versus-player red-versus-player">
+
+                        <img
+                            src="tank-red.png"
+                            alt=""
+                            draggable="false"
+                        >
+
+                        <strong id="vs-name2">RED</strong>
+
+                        <span>RED TEAM</span>
+
+                    </div>
+
+                </div>
+
+                <p id="vs-status">
+                    ENTERING THE BATTLEFIELD
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             BATTLEFIELD
+        =================================================== -->
+
+        <section
+            id="battle-screen"
+            class="screen battle-screen"
+            aria-label="Tank battle"
+        >
+
+            <!-- Battlefield scenery -->
+            <div id="battlefield" class="battlefield">
+
+                <div class="battle-background"></div>
+
+                <div class="battle-sky-effects"></div>
+
+                <!-- The game engine draws the fixed terrain here. -->
+                <canvas
+                    id="terrain-canvas"
+                    class="terrain-canvas"
+                    aria-label="Battle terrain"
+                ></canvas>
+
+
+                <!-- Tank positions -->
+                <div
+                    id="tank1"
+                    class="battle-tank battle-tank-blue"
+                    aria-label="Blue tank"
+                >
+                    <img
+                        id="tank1-image"
+                        src="tank-blue.png"
+                        alt=""
+                        draggable="false"
+                    >
+
+                    <div class="tank-nameplate">
+                        <span id="tank1-name">BLUE</span>
+                    </div>
+                </div>
+
+
+                <div
+                    id="tank2"
+                    class="battle-tank battle-tank-red"
+                    aria-label="Red tank"
+                >
+                    <img
+                        id="tank2-image"
+                        src="tank-red.png"
+                        alt=""
+                        draggable="false"
+                    >
+
+                    <div class="tank-nameplate">
+                        <span id="tank2-name">RED</span>
+                    </div>
+                </div>
+
+
+                <!-- Aim indicator -->
+                <canvas
+                    id="aim-canvas"
+                    class="aim-canvas"
+                    aria-label="Current aiming guide"
+                ></canvas>
+
+
+                <!-- Projectile and explosion effects -->
+                <div
+                    id="projectile-layer"
+                    class="projectile-layer"
+                    aria-hidden="true"
+                ></div>
+
+
+                <div
+                    id="effect-layer"
+                    class="effect-layer"
+                    aria-hidden="true"
+                ></div>
+
+            </div>
+
+
+
+            <!-- BATTLE HUD -->
+            <div class="battle-hud">
+
+                <div class="battle-topbar">
+
+                    <button
+                        id="battle-menu-btn"
+                        class="icon-button"
+                        type="button"
+                        aria-label="Open battle menu"
+                    >
+                        ☰
+                    </button>
+
+
+                    <div class="battle-player blue-hud-player">
+
+                        <div class="hud-player-info">
+                            <span id="hud-name1">BLUE</span>
+
+                            <strong id="hud-health1-text">
+                                100 HP
+                            </strong>
+                        </div>
+
+                        <div
+                            class="health-bar"
+                            role="progressbar"
+                            aria-label="Blue tank health"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            aria-valuenow="100"
+                            id="health1-bar"
+                        >
+                            <div
+                                id="health1-fill"
+                                class="health-fill blue-health-fill"
+                            ></div>
+                        </div>
+
+                    </div>
+
+
+                    <div class="battle-round">
+                        <span>ROUND</span>
+                        <strong id="round-number">1</strong>
+                    </div>
+
+
+                    <div class="battle-player red-hud-player">
+
+                        <div class="hud-player-info">
+                            <span id="hud-name2">RED</span>
+
+                            <strong id="hud-health2-text">
+                                100 HP
+                            </strong>
+                        </div>
+
+                        <div
+                            class="health-bar"
+                            role="progressbar"
+                            aria-label="Red tank health"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            aria-valuenow="100"
+                            id="health2-bar"
+                        >
+                            <div
+                                id="health2-fill"
+                                class="health-fill red-health-fill"
+                            ></div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Active player indicator -->
+                <div
+                    id="turn-indicator"
+                    class="turn-indicator"
+                    role="status"
+                    aria-live="polite"
+                >
+                    BLUE'S TURN
+                </div>
+
+
+                <!-- Battle controls -->
+                <div class="battle-controls">
+
+                    <!-- MOVEMENT -->
+                    <div class="control-group movement-controls">
+
+                        <span class="control-label">
+                            MOVEMENT
+                        </span>
+
+                        <div class="movement-buttons">
+
+                            <button
+                                id="move-left-btn"
+                                class="control-button"
+                                type="button"
+                                aria-label="Move tank left"
+                            >
+                                ◀
+                            </button>
+
+                            <button
+                                id="move-right-btn"
+                                class="control-button"
+                                type="button"
+                                aria-label="Move tank right"
+                            >
+                                ▶
+                            </button>
+
+                        </div>
+
+                        <div class="movement-status">
+                            <span>TIME LEFT</span>
+
+                            <strong id="movement-time">
+                                2.0 s
+                            </strong>
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- AIMING -->
+                    <div class="control-group aiming-controls">
+
+                        <label
+                            class="control-label"
+                            for="aim-angle"
+                        >
+                            CANNON ANGLE
+                        </label>
+
+                        <div class="range-control">
+
+                            <button
+                                id="angle-down-btn"
+                                class="small-control-button"
+                                type="button"
+                                aria-label="Decrease cannon angle"
+                            >
+                                −
+                            </button>
+
+                            <input
+                                id="aim-angle"
+                                type="range"
+                                min="5"
+                                max="85"
+                                value="45"
+                                step="1"
+                                aria-label="Cannon angle"
+                            >
+
+                            <button
+                                id="angle-up-btn"
+                                class="small-control-button"
+                                type="button"
+                                aria-label="Increase cannon angle"
+                            >
+                                +
+                            </button>
+
+                        </div>
+
+                        <output id="angle-value" for="aim-angle">
+                            45°
+                        </output>
+
+                    </div>
+
+
+
+                    <!-- SHOT POWER -->
+                    <div class="control-group power-controls">
+
+                        <label
+                            class="control-label"
+                            for="shot-power"
+                        >
+                            SHOT POWER
+                        </label>
+
+                        <input
+                            id="shot-power"
+                            type="range"
+                            min="20"
+                            max="100"
+                            value="65"
+                            step="1"
+                            aria-label="Shot power"
+                        >
+
+                        <output id="power-value" for="shot-power">
+                            65%
+                        </output>
+
+                    </div>
+
+
+
+                    <!-- FIRE -->
+                    <div class="control-group fire-controls">
+
+                        <span class="control-label">
+                            WEAPON
+                        </span>
+
+                        <button
+                            id="fire-btn"
+                            class="fire-button"
+                            type="button"
+                        >
+                            <span class="fire-icon">✹</span>
+
+                            <strong>FIRE!</strong>
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Battle menu overlay -->
+            <div
+                id="battle-menu-overlay"
+                class="overlay hidden"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="pause-title"
+            >
+
+                <div class="dialog-card">
+
+                    <span class="section-eyebrow">
+                        BATTLE PAUSED
+                    </span>
+
+                    <h2 id="pause-title">
+                        BATTLE MENU
+                    </h2>
+
+                    <button
+                        id="continue-battle-btn"
+                        class="game-button primary-button"
+                        type="button"
+                    >
+                        CONTINUE BATTLE
+                    </button>
+
+                    <button
+                        id="save-match-btn"
+                        class="game-button secondary-button"
+                        type="button"
+                    >
+                        SAVE MATCH
+                    </button>
+
+                    <button
+                        id="restart-match-btn"
+                        class="game-button secondary-button"
+                        type="button"
+                    >
+                        RESTART MATCH
+                    </button>
+
+                    <button
+                        id="return-menu-btn"
+                        class="game-button danger-button"
+                        type="button"
+                    >
+                        RETURN TO MENU
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             VICTORY / DEFEAT SCREEN
+        =================================================== -->
+
+        <section
+            id="result-screen"
+            class="screen result-screen"
+            aria-label="Battle result"
+        >
+
+            <div class="result-background"></div>
+
+            <div class="result-content">
+
+                <span id="result-eyebrow" class="section-eyebrow">
+                    BATTLE COMPLETE
+                </span>
+
+                <h1 id="result-title">
+                    VICTORY!
+                </h1>
+
+                <div class="result-tank">
+                    <img
+                        id="result-tank-image"
+                        src="tank-blue.png"
+                        alt="Winning tank"
+                        draggable="false"
+                    >
+                </div>
+
+                <h2 id="winner-name">
+                    BLUE
+                </h2>
+
+                <p id="result-description">
+                    THE BATTLE IS OVER.
+                </p>
+
+                <div class="result-stats">
+
+                    <div class="result-stat">
+                        <span>BLUE HEALTH</span>
+                        <strong id="result-health1">100 HP</strong>
+                    </div>
+
+                    <div class="result-stat">
+                        <span>RED HEALTH</span>
+                        <strong id="result-health2">0 HP</strong>
+                    </div>
+
+                </div>
+
+                <div class="result-buttons">
+
+                    <button
+                        id="rematch-btn"
+                        class="game-button primary-button"
+                        type="button"
+                    >
+                        ↻ REMATCH
+                    </button>
+
+                    <button
+                        id="result-menu-btn"
+                        class="game-button secondary-button"
+                        type="button"
+                    >
+                        MAIN MENU
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             SETTINGS
+        =================================================== -->
+
+        <section
+            id="settings-screen"
+            class="screen secondary-screen"
+            aria-label="Game settings"
+        >
+
+            <header class="screen-header">
+
+                <button
+                    id="settings-back-btn"
+                    class="back-button"
+                    type="button"
+                >
+                    ← BACK
+                </button>
+
+                <div class="screen-brand">
+                    GAME <strong>SETTINGS</strong>
+                </div>
+
+                <div class="header-spacer"></div>
+
+            </header>
+
+
+            <div class="screen-content settings-content">
+
+                <div class="section-heading">
+                    <span class="section-eyebrow">
+                        PERSONALISE YOUR GAME
+                    </span>
+
+                    <h1>SETTINGS</h1>
+                </div>
+
+
+                <div class="settings-panel">
+
+                    <div class="setting-row">
+
+                        <div class="setting-description">
+                            <strong>SOUND EFFECTS</strong>
+                            <span>Buttons, movement and explosions</span>
+                        </div>
+
+                        <label class="toggle-control">
+                            <input
+                                id="effects-toggle"
+                                type="checkbox"
+                                checked
+                            >
+
+                            <span class="toggle-slider"></span>
+                        </label>
+
+                    </div>
+
+
+                    <div class="setting-row">
+
+                        <div class="setting-description">
+                            <strong>BACKGROUND MUSIC</strong>
+                            <span>Music during gameplay</span>
+                        </div>
+
+                        <label class="toggle-control">
+                            <input
+                                id="music-toggle"
+                                type="checkbox"
+                            >
+
+                            <span class="toggle-slider"></span>
+                        </label>
+
+                    </div>
+
+
+                    <div class="setting-row volume-row">
+
+                        <label
+                            class="setting-description"
+                            for="volume-slider"
+                        >
+                            <strong>MASTER VOLUME</strong>
+                            <span>Adjust overall game audio</span>
+                        </label>
+
+                        <input
+                            id="volume-slider"
+                            type="range"
+                            min="0"
+                            max="100"
+                            value="45"
+                            step="1"
+                        >
+
+                        <output id="volume-value" for="volume-slider">
+                            45%
+                        </output>
+
+                    </div>
+
+
+                    <button
+                        id="reset-settings-btn"
+                        class="game-button secondary-button"
+                        type="button"
+                    >
+                        RESET SETTINGS
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             CONFIRMATION DIALOG
+        =================================================== -->
+
+        <div
+            id="confirmation-overlay"
+            class="overlay hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirmation-title"
+        >
+
+            <div class="dialog-card">
+
+                <span class="section-eyebrow">
+                    CONFIRM ACTION
+                </span>
+
+                <h2 id="confirmation-title">
+                    ARE YOU SURE?
+                </h2>
+
+                <p id="confirmation-message">
+                    Do you want to continue?
+                </p>
+
+                <div class="dialog-buttons">
+
+                    <button
+                        id="confirm-cancel-btn"
+                        class="game-button secondary-button"
+                        type="button"
+                    >
+                        CANCEL
+                    </button>
+
+                    <button
+                        id="confirm-accept-btn"
+                        class="game-button danger-button"
+                        type="button"
+                    >
+                        CONFIRM
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ==================================================
+             ACCESSIBLE GAME STATUS
+        =================================================== -->
+
+        <div
+            id="game-status"
+            class="visually-hidden"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+        ></div>
+
+
+    </main>
+
 </body>
-                                              </html>
+</html>
