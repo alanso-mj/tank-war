@@ -46,7 +46,7 @@ button {
 
 #main-menu {
   align-items: center;
-  justify-content: flex-start;
+  justify-content:center;
   padding: 5%;
   background: #42252b url("./menu-bg.png") center center / cover no-repeat;
 }
