@@ -226,3 +226,37 @@ button:active {
     width: min(40%, 390px);
   }
 }
+/* FIT MENU TO PHONE SCREEN */
+#main-menu {
+  min-height: 100dvh;
+  overflow-y: auto;
+}
+
+.menu-panel {
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+
+@media (orientation: portrait) {
+  .menu-panel {
+    width: min(88%, 360px);
+  }
+}
+
+@media (orientation: landscape) {
+  .menu-panel {
+    width: min(40%, 390px);
+    padding: 12px;
+  }
+
+  .menu-panel h1,
+  .menu-panel h2 {
+    font-size: clamp(20px, 3vw, 32px);
+    margin-bottom: 8px;
+  }
+
+  .menu-panel button {
+    margin-top: 8px;
+    padding: 9px;
+  }
+}
