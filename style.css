@@ -189,3 +189,40 @@ button:active {
     width: min(75%, 330px);
   }
 }
+/* PORTRAIT + LANDSCAPE SUPPORT */
+
+#main-menu {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  background: url("./menu-bg.png") center / cover no-repeat;
+}
+
+@media (orientation: portrait) {
+  #main-menu {
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .menu-panel {
+    width: min(85%, 360px);
+  }
+
+  .menu-panel button {
+    width: 100%;
+  }
+}
+
+@media (orientation: landscape) {
+  #main-menu {
+    justify-content: flex-start;
+    align-items: center;
+    padding: 4%;
+  }
+
+  .menu-panel {
+    width: min(40%, 390px);
+  }
+}
