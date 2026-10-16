@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#21151b">
+  <meta name="description" content="Tank War - an arcade tank battle game">
+  <title>Tank War</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<main id="app">
+
+  <!-- MAIN MENU -->
+  <section id="main-menu" class="screen active">
+    <div class="menu-panel">
+      <h1 class="logo">
+        <span class="logo-orange">TANK</span>
+        <span class="logo-tank">WAR</span>
+      </h1>
+
+      <p class="subtitle">READY FOR BATTLE?</p>
+
+      <div class="menu-buttons">
+        <button id="play-btn">PLAY</button>
+        <button id="settings-btn">SETTINGS</button>
+        <button id="how-to-btn">HOW TO PLAY</button>
+      </div>
+
+      <p class="version">TANK WAR V2</p>
+    </div>
+  </section>
+
+  <!-- MODE SELECTION -->
+  <section id="mode-screen" class="screen">
+    <h1>CHOOSE YOUR MODE</h1>
+
+    <div class="mode-cards">
+      <div class="mode-card">
+        <h2>⚔️ LOCAL MATCH</h2>
+        <p>Two players. One device. Take turns and battle!</p>
+        <button id="local-match-btn">LOCAL MATCH</button>
+      </div>
+
+      <div class="mode-card">
+        <h2>🌐 ONLINE MATCH</h2>
+        <p>Challenge a friend from another device.</p>
+        <button id="online-match-btn">ONLINE MATCH</button>
+      </div>
+    </div>
+
+    <button class="back-button" data-screen="main-menu">BACK</button>
+  </section>
+
+  <!-- LOCAL MATCH SETUP -->
+  <section id="local-setup-screen" class="screen">
+    <h1>LOCAL MATCH</h1>
+    <p>CHOOSE YOUR NAMES AND TANKS</p>
+
+    <div class="player-setup">
+
+      <!-- PLAYER 1 -->
+      <div class="player-panel player-one">
+        <h2>🔵 PLAYER 1</h2>
+
+        <label for="player1-name">Nickname</label>
+        <input
+          id="player1-name"
+          type="text"
+          maxlength="16"
+          placeholder="Enter nickname"
+          autocomplete="off"
+        >
+
+        <label for="player1-tank">Choose tank</label>
+        <select id="player1-tank">
+          <option value="blue">Blue Striker</option>
+          <option value="green">Green Guardian</option>
+          <option value="orange">Orange Raider</option>
+        </select>
+
+        <div class="tank-preview blue-preview">🚙</div>
+      </div>
+
+      <!-- PLAYER 2 -->
+      <div class="player-panel player-two">
+        <h2>🔴 PLAYER 2</h2>
+
+        <label for="player2-name">Nickname</label>
+        <input
+          id="player2-name"
+          type="text"
+          maxlength="16"
+          placeholder="Enter nickname"
+          autocomplete="off"
+        >
+
+        <label for="player2-tank">Choose tank</label>
+        <select id="player2-tank">
+          <option value="red">Red Destroyer</option>
+          <option value="green">Green Guardian</option>
+          <option value="orange">Orange Raider</option>
+        </select>
+
+        <div class="tank-preview red-preview">🚙</div>
+      </div>
+
+    </div>
+
+    <p id="setup-error" role="alert"></p>
+
+    <div class="setup-buttons">
+      <button id="start-battle-btn" class="primary-button">
+        START BATTLE
+      </button>
+
+      <button class="back-button" data-screen="mode-screen">
+        BACK
+      </button>
+    </div>
+  </section>
+
+  <!-- VS SCREEN -->
+  <section id="vs-screen" class="screen">
+    <h1>GET READY!</h1>
+
+    <div class="versus-container">
+      <div class="versus-player">
+        <div id="vs-tank1" class="tank-preview blue-preview">🚙</div>
+        <h2 id="vs-player1-name">PLAYER 1</h2>
+      </div>
+
+      <div class="versus-text">VS</div>
+
+      <div class="versus-player">
+        <div id="vs-tank2" class="tank-preview red-preview">🚙</div>
+        <h2 id="vs-player2-name">PLAYER 2</h2>
+      </div>
+    </div>
+
+    <p>100 HP EACH · TAKE TURNS · FIGHT!</p>
+
+    <button id="vs-continue-btn" class="primary-button">
+      CONTINUE
+    </button>
+
+    <button class="back-button" data-screen="local-setup-screen">
+      BACK
+    </button>
+  </section>
+
+  <!-- BATTLE PLACEHOLDER -->
+  <section id="battle-screen" class="screen">
+    <h1>BATTLEFIELD</h1>
+    <p id="battle-message">Your battle setup is ready!</p>
+    <p id="battle-player-info"></p>
+
+    <button class="back-button" data-screen="main-menu">
+      MAIN MENU
+    </button>
+  </section>
+
+  <!-- ONLINE PLACEHOLDER -->
+  <section id="online-screen" class="screen">
+    <h1>ONLINE MATCH</h1>
+    <p>Online multiplayer is coming soon!</p>
+    <button class="back-button" data-screen="mode-screen">BACK</button>
+  </section>
+
+  <!-- SETTINGS -->
+  <section id="settings-screen" class="screen">
+    <h1>SETTINGS</h1>
+    <button id="sound-toggle-btn">SOUND: ON</button>
+    <button class="back-button" data-screen="main-menu">BACK</button>
+  </section>
+
+  <!-- HOW TO PLAY -->
+  <section id="how-to-screen" class="screen">
+    <h1>HOW TO PLAY</h1>
+
+    <div class="panel">
+      <p>1. Choose Local Match to play on one device.</p>
+      <p>2. Enter nicknames and select tanks.</p>
+      <p>3. Each player takes turns.</p>
+      <p>4. Aim, adjust power and fire.</p>
+      <p>5. Reduce the opponent's HP to zero to win!</p>
+    </div>
+
+    <button class="back-button" data-screen="main-menu">BACK</button>
+  </section>
+
+</main>
+
+<script src="game.js"></script>
+</body>
+</html>
