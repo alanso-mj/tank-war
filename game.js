@@ -1,1502 +1,1937 @@
-/* =====================================================
-   TANK WAR — PHASE 2 GAME ENGINE
-   Local 2-player artillery battle
-   ===================================================== */
+/* TANK WAR — PHASE 2 GAME ENGINE
+   Matches the existing index.html structure.
+   No external libraries or paid services required. */
 
-"use strict";
+(() => {
+  "use strict";
 
-/* =====================================================
-   CONFIGURATION
-   ===================================================== */
+  const $ = (id) => document.getElementById(id);
 
-const CONFIG = {
-    MAX_HEALTH: 100,
-    MOVE_DISTANCE: 22,
-    MOVE_LIMIT: 85,
-    MIN_ANGLE: 5,
-    MAX_ANGLE: 85,
-    MIN_POWER: 20,
-    MAX_POWER: 100,
-    BASE_DAMAGE: 38,
-    MAX_DAMAGE: 55,
-    BLAST_RADIUS: 115,
-    GRAVITY: 360,
-    SAVE_KEY: "tankWarPhase2Save",
-    SETTINGS_KEY: "tankWarSettings"
-};
+  const setText = (id, value) => {
+    const el = $(id);
+    if (el) el.textContent = value;
+  };
 
-const TANKS = [
-    { name: "STRIKER", description: "Balanced assault tank" },
-    { name: "TITAN", description: "Heavy battlefield tank" },
-    { name: "PHANTOM", description: "Light reconnaissance tank" }
-];
+  const clamp = (value, min, max) =>
+    Math.max(min, Math.min(max, value));
 
-const $ = id => document.getElementById(id);
+  const rand = (min, max) =>
+    min + Math.random() * (max - min);
 
-const screens = [
-    "main-menu",
-    "mode-screen",
-    "setup-screen",
-    "vs-screen",
-    "battle-screen",
-    "victory-screen",
-    "settings-screen",
-    "how-to-screen",
-    "online-screen"
-];
+  const TANKS = [
+    {
+      name: "STRIKER",
+      speed: 1,
+      power: 1,
+      armor: 1,
+      description: "Balanced all-round tank"
+    },
+    {
+      name: "TITAN",
+      speed: 0.8,
+      power: 1.2,
+      armor: 1.25,
+      description: "Heavy armor, powerful shots"
+    },
+    {
+      name: "SCOUT",
+      speed: 1.25,
+      power: 0.9,
+      armor: 0.85,
+      description: "Fast and agile"
+    }
+  ];
 
-/* =====================================================
-   GAME STATE
-   ===================================================== */
-
-const game = {
+  const game = {
     screen: "main-menu",
     mode: "local",
+    players: [],
+    selectedTanks: [0, 1],
+    activePlayer: 0,
+    round: 1,
     running: false,
     paused: false,
     busy: false,
-    gameOver: false,
-
-    players: [
-        {
-            name: "PLAYER 1",
-            color: "blue",
-            health: CONFIG.MAX_HEALTH,
-            tankIndex: 0,
-            x: 0.12,
-            angle: 45,
-            power: 65,
-            moved: 0
-        },
-        {
-            name: "PLAYER 2",
-            color: "red",
-            health: CONFIG.MAX_HEALTH,
-            tankIndex: 1,
-            x: 0.78,
-            angle: 135,
-            power: 65,
-            moved: 0
-        }
-    ],
-
-    activePlayer: 0,
-    round: 1,
+    health: [100, 100],
+    x: [0, 0],
+    angle: [45, 45],
+    power: 65,
+    movementLeft: [100, 100],
     terrain: [],
-    effects: [],
-    lastSaved: 0,
-    noticeTimer: null,
-    messageTimer: null,
-    animationFrame: null,
-    lastFrame: 0,
-    resizeTimer: null
-};
+    terrainWidth: 0,
+    terrainHeight: 0,
 
-const settings = {
-    volume: 70,
-    music: true,
-    effects: true
-};
+    settings: {
+      volume: 0.45,
+      music: false,
+      effects: true
+    },
 
-/* =====================================================
-   DOM HELPERS
-   ===================================================== */
+    settingsReturnScreen: "main-menu",
+    confirmAction: null,
+    matchToken: 0,
+    audioContext: null,
+    saveKey: "tankWarLocalSaveV2"
+  };
 
-function setText(id, value) {
-    const element = $(id);
-    if (element) element.textContent = value;
-}
+  let resizeObserver = null;
+  let ambientTimer = null;
 
-function setHTML(id, value) {
-    const element = $(id);
-    if (element) element.innerHTML = value;
-}
-
-function setDisplay(id, value) {
-    const element = $(id);
-    if (element) element.style.display = value;
-}
-
-function listen(id, event, callback, options) {
-    const element = $(id);
-    if (element) {
-        element.addEventListener(event, callback, options);
-    }
-}
-
-function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
-}
-
-function activePlayer() {
-    return game.players[game.activePlayer];
-}
-
-function otherPlayer() {
-    return game.players[1 - game.activePlayer];
-}
-
-/* =====================================================
-   SCREEN NAVIGATION
-   ===================================================== */
-
-function showScreen(screenId) {
-    for (const id of screens) {
-        const screen = $(id);
-        if (screen) screen.classList.remove("active");
-    }
-
-    const target = $(screenId);
-
-    if (target) {
-        target.classList.add("active");
-        game.screen = screenId;
-    }
-
-    window.scrollTo(0, 0);
-}
-
-function showNotice(message, duration = 2200) {
-    const notice = $("global-notice");
-    if (!notice) return;
-
-    notice.textContent = message;
-    notice.classList.add("visible");
-
-    clearTimeout(game.noticeTimer);
-
-    game.noticeTimer = setTimeout(() => {
-        notice.classList.remove("visible");
-    }, duration);
-}
-
-function showBattleMessage(message, duration = 1600) {
-    const element = $("battle-message");
-    if (!element) return;
-
-    element.textContent = message;
-    element.classList.add("visible");
-
-    clearTimeout(game.messageTimer);
-
-    game.messageTimer = setTimeout(() => {
-        element.classList.remove("visible");
-    }, duration);
-}
-
-/* =====================================================
-   SETTINGS
-   ===================================================== */
-
-function loadSettings() {
-    try {
-        const saved = JSON.parse(
-            localStorage.getItem(CONFIG.SETTINGS_KEY) || "{}"
-        );
-
-        if (Number.isFinite(saved.volume)) {
-            settings.volume = clamp(saved.volume, 0, 100);
-        }
-
-        if (typeof saved.music === "boolean") {
-            settings.music = saved.music;
-        }
-
-        if (typeof saved.effects === "boolean") {
-            settings.effects = saved.effects;
-        }
-    } catch (error) {
-        console.warn("Could not load settings.", error);
-    }
-
-    applySettingsToUI();
-}
-
-function saveSettings() {
-    try {
-        localStorage.setItem(
-            CONFIG.SETTINGS_KEY,
-            JSON.stringify(settings)
-        );
-    } catch (error) {
-        console.warn("Could not save settings.", error);
-    }
-}
-
-function applySettingsToUI() {
-    if ($("master-volume")) {
-        $("master-volume").value = settings.volume;
-    }
-
-    if ($("volume-value")) {
-        $("volume-value").textContent = `${settings.volume}%`;
-    }
-
-    if ($("music-toggle")) {
-        $("music-toggle").checked = settings.music;
-    }
-
-    if ($("effects-toggle")) {
-        $("effects-toggle").checked = settings.effects;
-    }
-}
-
-function openSettings() {
-    game.settingsReturnScreen = game.screen;
-    showScreen("settings-screen");
-}
-
-function closeSettings() {
-    const returnScreen = game.settingsReturnScreen || "main-menu";
-
-    showScreen(returnScreen);
-
-    if (returnScreen === "battle-screen") {
-        updateHUD();
-        drawAimGuide();
-    }
-}
-
-/* =====================================================
-   PLAYER SETUP
-   ===================================================== */
-
-function readPlayerNames() {
-    const name1 = $("player1-name")?.value.trim();
-    const name2 = $("player2-name")?.value.trim();
-
-    game.players[0].name = name1 || "PLAYER 1";
-    game.players[1].name = name2 || "PLAYER 2";
-}
-
-function updateTankPreviews() {
-    const p1 = game.players[0];
-    const p2 = game.players[1];
-
-    setText("tank1-name", TANKS[p1.tankIndex]?.name || "STRIKER");
-    setText("tank2-name", TANKS[p2.tankIndex]?.name || "TITAN");
-
-    setText("tank1-preview-name", TANKS[p1.tankIndex]?.name || "STRIKER");
-    setText("tank2-preview-name", TANKS[p2.tankIndex]?.name || "TITAN");
-
-    setText("player1-setup-name", p1.name);
-    setText("player2-setup-name", p2.name);
-
-    setText("tank1-description", TANKS[p1.tankIndex]?.description || "");
-    setText("tank2-description", TANKS[p2.tankIndex]?.description || "");
-
-    const preview1 = $("tank1-preview");
-    const preview2 = $("tank2-preview");
-
-    if (preview1) preview1.dataset.tank = String(p1.tankIndex);
-    if (preview2) preview2.dataset.tank = String(p2.tankIndex);
-}
-
-function changeTank(playerIndex, direction) {
-    const player = game.players[playerIndex];
-
-    player.tankIndex =
-        (player.tankIndex + direction + TANKS.length) % TANKS.length;
-
-    updateTankPreviews();
-}
-
-/* =====================================================
-   STARTING A MATCH
-   ===================================================== */
-
-function startMatch() {
-    readPlayerNames();
-
-    game.running = false;
-    game.paused = false;
-    game.busy = false;
-    game.gameOver = false;
-
-    game.activePlayer = 0;
-    game.round = 1;
-    game.effects = [];
-
-    game.players.forEach((player, index) => {
-        player.health = CONFIG.MAX_HEALTH;
-        player.moved = 0;
-        player.power = 65;
-        player.angle = index === 0 ? 45 : 135;
-        player.x = index === 0 ? 0.12 : 0.78;
+  function showScreen(id) {
+    document.querySelectorAll(".screen").forEach((screen) => {
+      screen.classList.toggle("active", screen.id === id);
     });
 
-    clearSavedMatch();
+    game.screen = id;
 
-    showScreen("vs-screen");
+    if (id === "battle-screen") {
+      resizeBattlefield();
+      drawTerrain();
+      positionTanks();
+      updateHUD();
+      drawAimGuide();
+    }
+  }
 
-    setText("vs-name1", game.players[0].name);
-    setText("vs-name2", game.players[1].name);
-    setText("vs-countdown", "3");
+  function notice(message, duration = 2300) {
+    const el = $("global-notice");
+    if (!el) return;
 
-    let countdown = 3;
+    el.textContent = message;
+    el.classList.add("show");
 
-    const timer = setInterval(() => {
-        countdown--;
+    window.clearTimeout(notice.timer);
 
-        if (countdown > 0) {
-            setText("vs-countdown", String(countdown));
-        } else if (countdown === 0) {
-            setText("vs-countdown", "FIGHT!");
-        } else {
-            clearInterval(timer);
-            prepareBattlefield();
-        }
-    }, 800);
-}
+    notice.timer = window.setTimeout(() => {
+      el.classList.remove("show");
+    }, duration);
+  }
 
-function prepareBattlefield() {
-    showScreen("battle-screen");
+  function ensureAudio() {
+    if (game.audioContext) {
+      if (game.audioContext.state === "suspended") {
+        game.audioContext.resume().catch(() => {});
+      }
+
+      return game.audioContext;
+    }
+
+    const AudioCtx =
+      window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioCtx) return null;
+
+    try {
+      game.audioContext = new AudioCtx();
+      return game.audioContext;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function tone(
+    frequency,
+    duration,
+    type = "sine",
+    volume = 0.18,
+    slide = 0
+  ) {
+    if (!game.settings.effects || game.settings.volume <= 0) {
+      return;
+    }
+
+    const ctx = ensureAudio();
+    if (!ctx) return;
+
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const start = ctx.currentTime;
+
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, start);
+
+    if (slide) {
+      oscillator.frequency.exponentialRampToValueAtTime(
+        Math.max(30, frequency + slide),
+        start + duration
+      );
+    }
+
+    gain.gain.setValueAtTime(0.0001, start);
+
+    gain.gain.exponentialRampToValueAtTime(
+      Math.max(0.0001, volume * game.settings.volume),
+      start + 0.015
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+      0.0001,
+      start + duration
+    );
+
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+
+    oscillator.start(start);
+    oscillator.stop(start + duration + 0.03);
+  }
+
+  function playShotSound() {
+    tone(150, 0.25, "sawtooth", 0.22, -90);
+    tone(65, 0.32, "triangle", 0.16, -25);
+  }
+
+  function playExplosionSound() {
+    tone(95, 0.42, "sawtooth", 0.24, -60);
+    tone(48, 0.5, "triangle", 0.18, -15);
+  }
+
+  function playMoveSound() {
+    tone(105, 0.08, "square", 0.07, 15);
+  }
+
+  function updateSaveButton() {
+    const button = $("resume-match-btn");
+    if (!button) return;
+
+    const exists = !!localStorage.getItem(game.saveKey);
+
+    button.classList.toggle("hidden", !exists);
+    button.style.display = exists ? "" : "none";
+  }
+
+  function saveMatch(silent = true) {
+    if (!game.running || game.screen !== "battle-screen") {
+      return false;
+    }
+
+    const battlefield = $("battlefield");
+
+    const width = battlefield
+      ? battlefield.clientWidth
+      : window.innerWidth;
+
+    const height = battlefield
+      ? battlefield.clientHeight
+      : window.innerHeight;
+
+    const payload = {
+      version: 2,
+      mode: game.mode,
+      players: game.players,
+      selectedTanks: game.selectedTanks,
+      activePlayer: game.activePlayer,
+      round: game.round,
+      health: game.health,
+
+      x: game.x.map((x) => width ? x / width : x),
+
+      angle: game.angle,
+      power: game.power,
+      movementLeft: game.movementLeft,
+
+      terrain: game.terrain.map((p) => ({
+        x: width ? p.x / width : p.x,
+        y: height ? p.y / height : p.y
+      })),
+
+      terrainWidth: width,
+      terrainHeight: height,
+      savedAt: Date.now()
+    };
+
+    try {
+      localStorage.setItem(
+        game.saveKey,
+        JSON.stringify(payload)
+      );
+
+      updateSaveButton();
+
+      if (!silent) {
+        notice("Match saved on this device.");
+      }
+
+      return true;
+    } catch (_) {
+      if (!silent) {
+        notice("Could not save this match on your device.");
+      }
+
+      return false;
+    }
+  }
+
+  function clearSavedMatch() {
+    localStorage.removeItem(game.saveKey);
+    updateSaveButton();
+  }
+
+  function resumeSavedMatch() {
+    let saved;
+
+    try {
+      saved = JSON.parse(
+        localStorage.getItem(game.saveKey) || "null"
+      );
+    } catch (_) {
+      saved = null;
+    }
+
+    if (!saved || !saved.players || saved.players.length !== 2) {
+      notice("No saved match was found.");
+      updateSaveButton();
+      return;
+    }
+
+    game.mode = saved.mode || "local";
+    game.players = saved.players;
+    game.selectedTanks = saved.selectedTanks || [0, 1];
+
+    game.activePlayer = clamp(
+      Number(saved.activePlayer) || 0,
+      0,
+      1
+    );
+
+    game.round = Math.max(1, Number(saved.round) || 1);
+
+    game.health = (saved.health || [100, 100]).map((h) =>
+      clamp(Number(h) || 0, 0, 100)
+    );
+
+    game.angle = (saved.angle || [45, 45]).map((a) =>
+      clamp(Number(a) || 45, 5, 85)
+    );
+
+    game.power = clamp(Number(saved.power) || 65, 20, 100);
+
+    game.movementLeft = (
+      saved.movementLeft || [100, 100]
+    ).map((n) => clamp(Number(n) || 0, 0, 100));
+
+    game.x = saved.x || [0.18, 0.82];
+
+    game.terrain = (saved.terrain || []).map((p) => ({
+      x: Number(p.x) || 0,
+      y: Number(p.y) || 0
+    }));
+
+    game.terrainWidth = 1;
+    game.terrainHeight = 1;
 
     game.running = true;
     game.paused = false;
     game.busy = false;
-    game.lastFrame = 0;
+    game.matchToken++;
 
-    /*
-     * Wait for the battle screen to become visible before
-     * measuring it. This prevents zero-size canvas errors.
-     */
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            initializeTerrain();
-            positionTanks();
-            updateHUD();
-            updateControls();
-            drawAimGuide();
-            saveMatch();
-            startEffectLoop();
+    showScreen("battle-screen");
+    resizeBattlefield();
 
-            showBattleMessage(
-                `${activePlayer().name}'S TURN`,
-                1600
-            );
-        });
-    });
-}
+    if (game.terrain.length) {
+      const battlefield = $("battlefield");
+      const w = battlefield.clientWidth;
+      const h = battlefield.clientHeight;
 
-/* =====================================================
-   TERRAIN
-   ===================================================== */
+      game.terrain = game.terrain.map((p) => ({
+        x: p.x * w,
+        y: p.y * h
+      }));
 
-function initializeTerrain() {
-    const battlefield = $("battlefield");
-    if (!battlefield) return;
-
-    const width = battlefield.clientWidth;
-    const height = battlefield.clientHeight;
-
-    if (width < 1 || height < 1) return;
-
-    const points = [];
-    const groundY = height * 0.72;
-
-    for (let x = 0; x <= width; x += 4) {
-        const wave =
-            Math.sin(x * 0.012) * height * 0.025 +
-            Math.sin(x * 0.027) * height * 0.012;
-
-        points.push({
-            x,
-            y: groundY + wave
-        });
+      game.terrainWidth = w;
+      game.terrainHeight = h;
+    } else {
+      generateTerrain();
     }
 
-    points.push({
-        x: width,
-        y: height
+    game.x = game.x.map((x) =>
+      x <= 1 ? x * game.terrainWidth : x
+    );
+
+    positionTanks();
+    updateHUD();
+    updateControls();
+    drawTerrain();
+    drawAimGuide();
+
+    notice("Saved match restored.");
+  }
+
+  function startMatch() {
+    ensureAudio();
+
+    game.matchToken++;
+    game.running = false;
+    game.paused = false;
+    game.busy = false;
+
+    game.health = [100, 100];
+    game.activePlayer = 0;
+    game.round = 1;
+    game.power = 65;
+    game.angle = [45, 45];
+    game.movementLeft = [100, 100];
+
+    const name1 =
+      ($("player1-name")?.value || "BLUE")
+        .trim()
+        .slice(0, 18) || "BLUE";
+
+    const name2 =
+      ($("player2-name")?.value || "RED")
+        .trim()
+        .slice(0, 18) || "RED";
+
+    game.players = [
+      {
+        name: name1,
+        tank: TANKS[game.selectedTanks[0]] || TANKS[0]
+      },
+      {
+        name: name2,
+        tank: TANKS[game.selectedTanks[1]] || TANKS[1]
+      }
+    ];
+
+    setText("vs-name1", name1);
+    setText("vs-name2", name2);
+
+    showScreen("vs-screen");
+    setText("vs-countdown", "3");
+
+    let count = 3;
+    const token = game.matchToken;
+
+    const countdown = window.setInterval(() => {
+      if (token !== game.matchToken) {
+        window.clearInterval(countdown);
+        return;
+      }
+
+      count--;
+
+      if (count > 0) {
+        setText("vs-countdown", String(count));
+      } else {
+        window.clearInterval(countdown);
+
+        game.running = true;
+        showScreen("battle-screen");
+
+        generateTerrain();
+
+        const battlefield = $("battlefield");
+        const w = battlefield.clientWidth || window.innerWidth;
+
+        game.x = [w * 0.18, w * 0.82];
+
+        positionTanks();
+        updateHUD();
+        updateControls();
+        drawTerrain();
+        drawAimGuide();
+        saveMatch(true);
+
+        notice(`${name1}'s turn — aim and fire!`);
+      }
+    }, 700);
+  }
+
+  function generateTerrain() {
+    const battlefield = $("battlefield");
+
+    const w = Math.max(
+      320,
+      battlefield?.clientWidth || window.innerWidth
+    );
+
+    const h = Math.max(
+      240,
+      battlefield?.clientHeight || window.innerHeight * 0.65
+    );
+
+    const step = 4;
+    const base = h * 0.69;
+    let y = base;
+
+    game.terrain = [
+      { x: 0, y: base + rand(-8, 8) }
+    ];
+
+    for (let x = step; x < w; x += step) {
+      y += rand(-5, 5);
+      y = clamp(y, h * 0.54, h * 0.82);
+
+      game.terrain.push({ x, y });
+    }
+
+    game.terrain.push({
+      x: w,
+      y: base + rand(-8, 8)
     });
 
-    points.push({
-        x: 0,
-        y: height
-    });
-
-    game.terrain = points;
+    game.terrainWidth = w;
+    game.terrainHeight = h;
+    game.x = [w * 0.18, w * 0.82];
 
     drawTerrain();
-}
+  }
 
-function drawTerrain() {
-    const canvas = $("terrain-canvas");
+  function resizeBattlefield() {
     const battlefield = $("battlefield");
+    const canvas = $("terrain-canvas");
 
-    if (!canvas || !battlefield) return;
+    if (!battlefield || !canvas) return;
 
-    const width = battlefield.clientWidth;
-    const height = battlefield.clientHeight;
+    const w = Math.max(1, battlefield.clientWidth);
+    const h = Math.max(1, battlefield.clientHeight);
 
-    if (!width || !height) return;
+    const oldW = game.terrainWidth;
+    const oldH = game.terrainHeight;
 
-    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    if (
+      game.terrain.length &&
+      oldW > 1 &&
+      oldH > 1 &&
+      (oldW !== w || oldH !== h)
+    ) {
+      game.terrain = game.terrain.map((p) => ({
+        x: p.x / oldW * w,
+        y: p.y / oldH * h
+      }));
 
-    canvas.width = Math.round(width * ratio);
-    canvas.height = Math.round(height * ratio);
-
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-
-    const ctx = canvas.getContext("2d");
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    ctx.clearRect(0, 0, width, height);
-
-    if (game.terrain.length < 3) return;
-
-    ctx.beginPath();
-    ctx.moveTo(game.terrain[0].x, game.terrain[0].y);
-
-    for (let i = 1; i < game.terrain.length; i++) {
-        ctx.lineTo(game.terrain[i].x, game.terrain[i].y);
+      game.x = game.x.map((x) => x / oldW * w);
     }
 
+    game.terrainWidth = w;
+    game.terrainHeight = h;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+
+    const ctx = canvas.getContext("2d");
+
+    if (ctx) {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    if (game.terrain.length) drawTerrain();
+    if (game.players.length) positionTanks();
+
+    drawAimGuide();
+  }
+
+  function terrainYAt(x) {
+    if (!game.terrain.length) {
+      return (game.terrainHeight || 300) * 0.7;
+    }
+
+    x = clamp(x, 0, game.terrainWidth || 1);
+
+    let lo = 0;
+    let hi = game.terrain.length - 1;
+
+    while (lo < hi - 1) {
+      const mid = (lo + hi) >> 1;
+
+      if (game.terrain[mid].x < x) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+
+    const a = game.terrain[lo];
+    const b = game.terrain[hi];
+
+    const t = b.x === a.x
+      ? 0
+      : (x - a.x) / (b.x - a.x);
+
+    return a.y + (b.y - a.y) * t;
+  }
+
+  function drawTerrain() {
+    const canvas = $("terrain-canvas");
+
+    if (!canvas || !game.terrain.length) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const w = game.terrainWidth || canvas.clientWidth;
+    const h = game.terrainHeight || canvas.clientHeight;
+
+    ctx.clearRect(0, 0, w, h);
+
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+
+    game.terrain.forEach((p) => {
+      ctx.lineTo(p.x, p.y);
+    });
+
+    ctx.lineTo(w, h);
     ctx.closePath();
 
-    const gradient = ctx.createLinearGradient(0, height * 0.65, 0, height);
+    const gradient = ctx.createLinearGradient(
+      0,
+      h * 0.52,
+      0,
+      h
+    );
 
-    gradient.addColorStop(0, "#a9764e");
-    gradient.addColorStop(0.3, "#79513a");
-    gradient.addColorStop(1, "#392b25");
+    gradient.addColorStop(0, "#b78a51");
+    gradient.addColorStop(0.45, "#755033");
+    gradient.addColorStop(1, "#3a2b22");
 
     ctx.fillStyle = gradient;
     ctx.fill();
 
     ctx.beginPath();
-    ctx.moveTo(game.terrain[0].x, game.terrain[0].y);
 
-    for (let i = 1; i < game.terrain.length; i++) {
-        ctx.lineTo(game.terrain[i].x, game.terrain[i].y);
-    }
-
-    ctx.strokeStyle = "#e4b17b";
-    ctx.lineWidth = 3;
-    ctx.stroke();
-}
-
-function terrainHeightAt(x) {
-    if (game.terrain.length < 2) return 0;
-
-    for (let i = 0; i < game.terrain.length - 1; i++) {
-        const a = game.terrain[i];
-        const b = game.terrain[i + 1];
-
-        if (x >= a.x && x <= b.x) {
-            const span = b.x - a.x;
-            const ratio = span ? (x - a.x) / span : 0;
-
-            return a.y + (b.y - a.y) * ratio;
-        }
-    }
-
-    return game.terrain[game.terrain.length - 1].y;
-}
-
-function deformTerrain(centerX, radius) {
-    if (game.terrain.length < 3) return;
-
-    const battlefield = $("battlefield");
-    if (!battlefield) return;
-
-    const width = battlefield.clientWidth;
-    const height = battlefield.clientHeight;
-
-    for (const point of game.terrain) {
-        const distance = Math.abs(point.x - centerX);
-
-        if (distance < radius) {
-            const ratio = 1 - distance / radius;
-
-            point.y = Math.min(
-                height - 10,
-                point.y + ratio * radius * 0.7
-            );
-        }
-    }
-
-    drawTerrain();
-    positionTanks();
-}
-
-/* =====================================================
-   TANK POSITIONS
-   ===================================================== */
-
-function positionTanks() {
-    const battlefield = $("battlefield");
-
-    if (!battlefield) return;
-
-    const width = battlefield.clientWidth;
-    const height = battlefield.clientHeight;
-
-    if (width < 1 || height < 1) return;
-
-    game.players.forEach((player, index) => {
-        const tank = $(`tank${index + 1}`);
-
-        if (!tank) return;
-
-        const tankWidth = tank.offsetWidth || 90;
-
-        const left = clamp(
-            player.x * width,
-            0,
-            width - tankWidth
-        );
-
-        const groundY = terrainHeightAt(left + tankWidth / 2);
-
-        tank.style.left = `${left}px`;
-        tank.style.bottom = `${Math.max(0, height - groundY)}px`;
-
-        tank.style.transform =
-            index === 0 ? "scaleX(1)" : "scaleX(-1)";
+    game.terrain.forEach((p, i) => {
+      if (i) {
+        ctx.lineTo(p.x, p.y);
+      } else {
+        ctx.moveTo(p.x, p.y);
+      }
     });
 
-    drawAimGuide();
-}
+    ctx.strokeStyle = "#e4bd78";
+    ctx.lineWidth = 3;
+    ctx.stroke();
 
-function moveTank(direction) {
-    if (!canAct()) return;
+    for (let i = 22; i < game.terrain.length; i += 47) {
+      const p = game.terrain[i];
 
-    const player = activePlayer();
+      ctx.fillStyle = "rgba(48,35,25,.38)";
+      ctx.beginPath();
+
+      ctx.ellipse(
+        p.x,
+        p.y + 9,
+        4 + (i % 3),
+        2,
+        0,
+        0,
+        Math.PI * 2
+      );
+
+      ctx.fill();
+    }
+  }  function positionTanks() {
+    if (!game.players.length) return;
+
     const battlefield = $("battlefield");
-
     if (!battlefield) return;
 
-    const width = battlefield.clientWidth;
-    const tank = $(`tank${game.activePlayer + 1}`);
+    const w = battlefield.clientWidth;
 
-    if (!tank) return;
+    [0, 1].forEach((i) => {
+      const tank = $(`tank${i + 1}`);
+      if (!tank) return;
 
-    const tankWidth = tank.offsetWidth || 90;
-    const currentX = player.x * width;
+      const tankWidth = tank.offsetWidth || 72;
 
-    const nextX = clamp(
-        currentX + direction * CONFIG.MOVE_DISTANCE,
-        0,
-        width - tankWidth
-    );
+      const x = clamp(
+        game.x[i],
+        tankWidth * 0.5,
+        w - tankWidth * 0.5
+      );
 
-    const distanceMoved = Math.abs(nextX - currentX);
+      game.x[i] = x;
 
-    if (distanceMoved < 1) {
-        showNotice("You cannot move further!");
-        return;
-    }
+      const ground = terrainYAt(x);
 
-    if (player.moved + distanceMoved > CONFIG.MOVE_LIMIT) {
-        showNotice("Movement limit reached!");
-        return;
-    }
+      tank.style.left = `${x}px`;
 
-    player.x = nextX / width;
-    player.moved += distanceMoved;
+      tank.style.bottom = `${
+        Math.max(0, battlefield.clientHeight - ground)
+      }px`;
 
-    positionTanks();
-    updateControls();
-    saveMatch();
-}
+      const turret = tank.querySelector(".tank-turret");
 
-/* =====================================================
-   AIMING
-   ===================================================== */
+      if (turret) {
+        turret.style.transform = `rotate(${-game.angle[i]}deg)`;
+      }
 
-function setAngle(value) {
-    if (game.busy || game.paused || game.gameOver) return;
+      tank.setAttribute(
+        "aria-label",
+        `${game.players[i].name} tank`
+      );
+    });
+  }
 
-    const player = activePlayer();
-
-    player.angle = clamp(
-        Number(value),
-        CONFIG.MIN_ANGLE,
-        CONFIG.MAX_ANGLE
-    );
-
-    drawAimGuide();
-    updateControls();
-    saveMatch();
-}
-
-function setPower(value) {
-    if (game.busy || game.paused || game.gameOver) return;
-
-    activePlayer().power = clamp(
-        Number(value),
-        CONFIG.MIN_POWER,
-        CONFIG.MAX_POWER
-    );
-
-    updateControls();
-    drawAimGuide();
-    saveMatch();
-}
-
-function getBarrelDirection(player, playerIndex) {
-    /*
-     * Player 1 fires right; player 2 fires left.
-     * Their displayed angle is measured above the horizontal.
-     */
-    const radians = player.angle * Math.PI / 180;
-    const facing = playerIndex === 0 ? 1 : -1;
-
-    return {
-        x: Math.cos(radians) * facing,
-        y: -Math.sin(radians)
-    };
-}
-
-function getTankMuzzle(playerIndex) {
-    const tank = $(`tank${playerIndex + 1}`);
+  function getMuzzle(i) {
+    const tank = $(`tank${i + 1}`);
     const battlefield = $("battlefield");
 
     if (!tank || !battlefield) {
-        return { x: 0, y: 0 };
+      return {
+        x: game.x[i],
+        y: terrainYAt(game.x[i]) - 25
+      };
     }
 
     const rect = tank.getBoundingClientRect();
     const fieldRect = battlefield.getBoundingClientRect();
 
-    const player = game.players[playerIndex];
-    const direction = getBarrelDirection(player, playerIndex);
+    const centerX =
+      rect.left - fieldRect.left + rect.width / 2;
 
-    const centerX = rect.left - fieldRect.left + rect.width / 2;
-    const centerY = rect.top - fieldRect.top + rect.height * 0.4;
+    const groundY = terrainYAt(game.x[i]);
+
+    const y =
+      groundY - Math.max(25, rect.height * 0.68);
+
+    const radians =
+      game.angle[i] * Math.PI / 180;
+
+    const direction = i === 0 ? 1 : -1;
 
     return {
-        x: centerX + direction.x * 32,
-        y: centerY + direction.y * 25,
-        direction
+      x: centerX + direction * Math.cos(radians) * 29,
+      y: y - Math.sin(radians) * 29
     };
-}
+  }
 
-function drawAimGuide() {
-    const canvas = $("aim-canvas");
-    const battlefield = $("battlefield");
+  function updateHUD() {
+    for (let i = 0; i < 2; i++) {
+      setText(
+        `hud-name${i + 1}`,
+        game.players[i]?.name ||
+          (i === 0 ? "BLUE" : "RED")
+      );
 
-    if (!canvas || !battlefield || game.screen !== "battle-screen") {
-        return;
+      setText(
+        `hp${i + 1}-text`,
+        `${Math.round(game.health[i])}%`
+      );
+
+      const bar = $(`health${i + 1}`);
+
+      if (bar) {
+        bar.style.width =
+          `${clamp(game.health[i], 0, 100)}%`;
+
+        bar.setAttribute(
+          "aria-valuenow",
+          String(Math.round(game.health[i]))
+        );
+      }
     }
 
-    const width = battlefield.clientWidth;
-    const height = battlefield.clientHeight;
+    const active =
+      game.players[game.activePlayer]?.name || "PLAYER";
 
-    if (!width || !height) return;
+    setText("round-label", `ROUND ${game.round}`);
 
-    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    setText(
+      "turn-indicator",
+      `${active.toUpperCase()}'S TURN`
+    );
 
-    canvas.width = Math.round(width * ratio);
-    canvas.height = Math.round(height * ratio);
+    setText(
+      "movement-indicator",
+      `MOVE: ${Math.round(
+        game.movementLeft[game.activePlayer] || 0
+      )}%`
+    );
 
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    setText(
+      "angle-value",
+      `${Math.round(game.angle[game.activePlayer])}°`
+    );
+
+    setText("power-value", `${Math.round(game.power)}%`);
+
+    setText(
+      "movement-time",
+      `${Math.round(
+        game.movementLeft[game.activePlayer] || 0
+      )}%`
+    );
+
+    const p1 = document.querySelector(".hud-blue");
+    const p2 = document.querySelector(".hud-red");
+
+    if (p1) {
+      p1.classList.toggle(
+        "active-turn",
+        game.activePlayer === 0
+      );
+    }
+
+    if (p2) {
+      p2.classList.toggle(
+        "active-turn",
+        game.activePlayer === 1
+      );
+    }
+  }
+
+  function updateControls() {
+    const power = $("power-slider");
+
+    if (power) {
+      power.value = String(game.power);
+    }
+
+    const canAct =
+      game.running && !game.paused && !game.busy;
+
+    const left = $("move-left-btn");
+    const right = $("move-right-btn");
+    const fire = $("fire-btn");
+
+    if (left) {
+      left.disabled =
+        !canAct ||
+        game.movementLeft[game.activePlayer] <= 0;
+    }
+
+    if (right) {
+      right.disabled =
+        !canAct ||
+        game.movementLeft[game.activePlayer] <= 0;
+    }
+
+    if (fire) {
+      fire.disabled = !canAct;
+    }
+
+    updateHUD();
+  }
+
+  function drawAimGuide() {
+    const canvas = $("aim-canvas");
+    const field = $("battlefield");
+
+    if (
+      !canvas ||
+      !field ||
+      !game.players.length ||
+      game.screen !== "battle-screen"
+    ) {
+      return;
+    }
+
+    const w = field.clientWidth;
+    const h = field.clientHeight;
+
+    const dpr = Math.min(
+      window.devicePixelRatio || 1,
+      2
+    );
+
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
 
     const ctx = canvas.getContext("2d");
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    ctx.clearRect(0, 0, width, height);
+    if (!ctx) return;
 
-    if (!game.running || game.paused || game.gameOver) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
 
-    const player = activePlayer();
-    const muzzle = getTankMuzzle(game.activePlayer);
-
-    const direction = muzzle.direction;
-    const power = player.power;
-
-    const speed = power * 3.0;
-    const gravity = CONFIG.GRAVITY;
-
-    ctx.beginPath();
-
-    for (let i = 0; i <= 30; i++) {
-        const time = i * 0.07;
-
-        const x = muzzle.x + direction.x * speed * time;
-        const y =
-            muzzle.y +
-            direction.y * speed * time +
-            0.5 * gravity * time * time;
-
-        if (x < 0 || x > width || y > height || y < -height) break;
-
-        if (i === 0) {
-            ctx.moveTo(x, y);
-        } else {
-            ctx.lineTo(x, y);
-        }
+    if (game.busy || game.paused || !game.running) {
+      return;
     }
 
-    ctx.setLineDash([4, 7]);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle =
-        game.activePlayer === 0
-            ? "rgba(100, 205, 255, 0.75)"
-            : "rgba(255, 115, 115, 0.75)";
+    const i = game.activePlayer;
+    const muzzle = getMuzzle(i);
 
+    const direction = i === 0 ? 1 : -1;
+
+    const radians =
+      game.angle[i] * Math.PI / 180;
+
+    const speed = game.power * 3.15;
+
+    let x = muzzle.x;
+    let y = muzzle.y;
+
+    const vx = Math.cos(radians) * speed * direction;
+    let vy = -Math.sin(radians) * speed;
+
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+
+    for (let t = 0; t < 2.3; t += 0.07) {
+      x += vx * 0.07;
+      y += vy * 0.07;
+      vy += 360 * 0.07;
+
+      if (x < 0 || x > w || y > terrainYAt(x)) {
+        break;
+      }
+
+      ctx.lineTo(x, y);
+    }
+
+    ctx.setLineDash([5, 7]);
+
+    ctx.strokeStyle =
+      i === 0
+        ? "rgba(105,205,255,.75)"
+        : "rgba(255,118,105,.75)";
+
+    ctx.lineWidth = 2;
     ctx.stroke();
     ctx.setLineDash([]);
-}
+  }
 
-/* =====================================================
-   SHOOTING
-   ===================================================== */
+  function setAngle(value) {
+    game.angle[game.activePlayer] =
+      clamp(Number(value) || 45, 5, 85);
 
-function canAct() {
-    return (
-        game.running &&
-        !game.paused &&
-        !game.busy &&
-        !game.gameOver &&
-        game.screen === "battle-screen"
+    positionTanks();
+    updateHUD();
+    drawAimGuide();
+    saveMatch(true);
+  }
+
+  function aimFromPointer(event) {
+    if (!game.running || game.paused || game.busy) {
+      return;
+    }
+
+    const field = $("battlefield");
+    if (!field) return;
+
+    const rect = field.getBoundingClientRect();
+
+    const px = event.clientX - rect.left;
+    const py = event.clientY - rect.top;
+
+    const muzzle = getMuzzle(game.activePlayer);
+
+    const direction =
+      game.activePlayer === 0 ? 1 : -1;
+
+    const dx = (px - muzzle.x) * direction;
+    const dy = muzzle.y - py;
+
+    if (dx < -8) return;
+
+    const angle =
+      Math.atan2(dy, Math.max(1, dx)) * 180 / Math.PI;
+
+    setAngle(angle);
+  }
+
+  function moveTank(direction) {
+    if (!game.running || game.paused || game.busy) {
+      return;
+    }
+
+    const i = game.activePlayer;
+
+    if (game.movementLeft[i] <= 0) {
+      notice("No movement left this turn.");
+      return;
+    }
+
+    const field = $("battlefield");
+    if (!field) return;
+
+    const tank = $(`tank${i + 1}`);
+    const half = (tank?.offsetWidth || 72) / 2;
+
+    const step = Math.min(
+      18,
+      game.movementLeft[i] * 0.35
     );
-}
 
-function fireShell() {
-    if (!canAct()) return;
+    const newX = clamp(
+      game.x[i] + direction * step,
+      half,
+      field.clientWidth - half
+    );
+
+    const actual = Math.abs(newX - game.x[i]);
+
+    if (actual < 1) {
+      notice("The tank can't move farther that way.");
+      return;
+    }
+
+    game.x[i] = newX;
+
+    game.movementLeft[i] = Math.max(
+      0,
+      game.movementLeft[i] - actual * 0.75
+    );
+
+    playMoveSound();
+    positionTanks();
+    updateControls();
+    drawAimGuide();
+    saveMatch(true);
+  }
+
+  function showDamage(x, y, damage) {
+    const layer = $("damage-layer");
+    if (!layer) return;
+
+    const el = document.createElement("div");
+
+    el.className = "damage-number";
+    el.textContent = `-${Math.round(damage)}`;
+
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+
+    layer.appendChild(el);
+
+    window.setTimeout(() => el.remove(), 900);
+  }
+
+  function spawnMuzzleFlash(x, y) {
+    const layer = $("effect-layer");
+    if (!layer) return;
+
+    const el = document.createElement("div");
+
+    el.className = "muzzle-flash";
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+
+    layer.appendChild(el);
+
+    window.setTimeout(() => el.remove(), 180);
+  }
+
+  function explode(x, y) {
+    const layer = $("explosion-layer");
+
+    if (layer) {
+      const el = document.createElement("div");
+
+      el.className = "explosion-effect";
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+
+      el.style.setProperty(
+        "--effect-size",
+        `${rand(58, 86)}px`
+      );
+
+      layer.appendChild(el);
+
+      window.setTimeout(() => el.remove(), 700);
+    }
+
+    playExplosionSound();
+
+    const field = $("battlefield");
+
+    if (field) {
+      field.classList.remove("screen-shake");
+      void field.offsetWidth;
+      field.classList.add("screen-shake");
+
+      window.setTimeout(() => {
+        field.classList.remove("screen-shake");
+      }, 260);
+    }
+
+    const damageRadius = 112;
+    const craterRadius = 92;
+
+    for (let i = 0; i < 2; i++) {
+      const tank = $(`tank${i + 1}`);
+
+      const centerY =
+        terrainYAt(game.x[i]) -
+        ((tank?.offsetHeight || 40) * 0.55);
+
+      const distance = Math.hypot(
+        game.x[i] - x,
+        centerY - y
+      );
+
+      if (distance <= damageRadius) {
+        const baseDamage = Math.max(
+          0,
+          47 * (1 - distance / (damageRadius + 10))
+        );
+
+        const armor =
+          game.players[i]?.tank?.armor || 1;
+
+        const damage = Math.max(
+          4,
+          baseDamage / armor
+        );
+
+        game.health[i] = clamp(
+          game.health[i] - damage,
+          0,
+          100
+        );
+
+        showDamage(
+          game.x[i],
+          centerY - 20,
+          damage
+        );
+      }
+    }
+
+    // Make a crater where the shell lands.
+    if (x >= 0 && x <= game.terrainWidth) {
+      game.terrain = game.terrain.map((p) => {
+        const distance = Math.abs(p.x - x);
+
+        if (distance >= craterRadius) {
+          return p;
+        }
+
+        const depth =
+          35 * (1 - distance / craterRadius);
+
+        return {
+          x: p.x,
+          y: clamp(
+            p.y + depth,
+            game.terrainHeight * 0.5,
+            game.terrainHeight - 12
+          )
+        };
+      });
+
+      drawTerrain();
+      positionTanks();
+    }
+
+    updateHUD();
+    saveMatch(true);
+
+    if (game.health.some((health) => health <= 0)) {
+      finishMatch();
+    } else {
+      window.setTimeout(() => finishShot(), 350);
+    }
+       }  function launchProjectile(token) {
+    if (
+      token !== game.matchToken ||
+      !game.running ||
+      game.paused
+    ) {
+      return;
+    }
+
+    const i = game.activePlayer;
+    const muzzle = getMuzzle(i);
+    const direction = i === 0 ? 1 : -1;
+
+    const radians =
+      game.angle[i] * Math.PI / 180;
+
+    const speed =
+      game.power *
+      3.15 *
+      (game.players[i]?.tank?.power || 1);
+
+    let x = muzzle.x;
+    let y = muzzle.y;
+
+    const vx =
+      Math.cos(radians) * speed * direction;
+
+    let vy = -Math.sin(radians) * speed;
+
+    const layer = $("projectile-layer");
+    const projectile = document.createElement("div");
+
+    projectile.className = "shell-projectile";
+
+    if (layer) {
+      layer.appendChild(projectile);
+    }
+
+    let previous = performance.now();
+
+    function frame(now) {
+      if (
+        token !== game.matchToken ||
+        !game.running
+      ) {
+        projectile.remove();
+        return;
+      }
+
+      if (game.paused) {
+        previous = now;
+        requestAnimationFrame(frame);
+        return;
+      }
+
+      const dt = Math.min(
+        0.035,
+        Math.max(0.001, (now - previous) / 1000)
+      );
+
+      previous = now;
+
+      x += vx * dt;
+      y += vy * dt;
+      vy += 360 * dt;
+
+      projectile.style.left = `${x}px`;
+      projectile.style.top = `${y}px`;
+
+      const w = game.terrainWidth;
+      const h = game.terrainHeight;
+
+      if (
+        x < -8 ||
+        x > w + 8 ||
+        y > h + 20 ||
+        y < -80
+      ) {
+        projectile.remove();
+        finishShot();
+        return;
+      }
+
+      const target = 1 - i;
+      const targetElement = $(`tank${target + 1}`);
+
+      const targetY =
+        terrainYAt(game.x[target]) -
+        ((targetElement?.offsetHeight || 40) * 0.55);
+
+      if (
+        Math.hypot(
+          x - game.x[target],
+          y - targetY
+        ) < 27
+      ) {
+        projectile.remove();
+        explode(x, y);
+        return;
+      }
+
+      if (y >= terrainYAt(x)) {
+        projectile.remove();
+        explode(x, y);
+        return;
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  function fireShell() {
+    if (
+      !game.running ||
+      game.paused ||
+      game.busy
+    ) {
+      return;
+    }
+
+    ensureAudio();
 
     game.busy = true;
     updateControls();
 
-    const shooterIndex = game.activePlayer;
-    const player = game.players[shooterIndex];
-    const muzzle = getTankMuzzle(shooterIndex);
+    const token = game.matchToken;
+    const muzzle = getMuzzle(game.activePlayer);
 
-    const direction = muzzle.direction;
-    const speed = player.power * 3.0;
+    spawnMuzzleFlash(muzzle.x, muzzle.y);
+    playShotSound();
 
-    const projectile = document.createElement("div");
-    projectile.className = "projectile";
+    launchProjectile(token);
+    saveMatch(true);
+  }
 
-    $("projectile-layer")?.appendChild(projectile);
-
-    const shell = {
-        x: muzzle.x,
-        y: muzzle.y,
-        vx: direction.x * speed,
-        vy: direction.y * speed,
-        element: projectile,
-        shooterIndex,
-        elapsed: 0
-    };
-
-    showBattleMessage(`${player.name} FIRED!`, 900);
-
-    launchProjectile(shell);
-}
-
-function launchProjectile(shell) {
-    let previousTime = performance.now();
-
-    function frame(now) {
-        if (game.paused || game.gameOver) {
-            previousTime = now;
-            requestAnimationFrame(frame);
-            return;
-        }
-
-        const delta = Math.min((now - previousTime) / 1000, 0.035);
-        previousTime = now;
-
-        shell.elapsed += delta;
-
-        shell.x += shell.vx * delta;
-        shell.y += shell.vy * delta;
-
-        shell.vy += CONFIG.GRAVITY * delta;
-
-        shell.element.style.left = `${shell.x}px`;
-        shell.element.style.top = `${shell.y}px`;
-
-        if (shell.elapsed > 0.08) {
-            const trail = document.createElement("div");
-            trail.className = "smoke-particle";
-            trail.style.left = `${shell.x}px`;
-            trail.style.top = `${shell.y}px`;
-            trail.style.width = "7px";
-            trail.style.height = "7px";
-
-            $("effect-layer")?.appendChild(trail);
-
-            setTimeout(() => trail.remove(), 800);
-        }
-
-        const battlefield = $("battlefield");
-
-        if (!battlefield) {
-            shell.element.remove();
-            finishShot();
-            return;
-        }
-
-        const width = battlefield.clientWidth;
-        const height = battlefield.clientHeight;
-
-        const targetIndex = 1 - shell.shooterIndex;
-        const target = getTankMuzzle(targetIndex);
-
-        const dx = shell.x - target.x;
-        const dy = shell.y - target.y;
-
-        const hitTarget = Math.hypot(dx, dy) < 35;
-
-        const groundY = terrainHeightAt(
-            clamp(shell.x, 0, width)
-        );
-
-        const hitGround = shell.y >= groundY;
-
-        const outside =
-            shell.x < -20 ||
-            shell.x > width + 20 ||
-            shell.y > height + 20 ||
-            shell.elapsed > 5;
-
-        if (hitTarget || hitGround || outside) {
-            const impactX = clamp(shell.x, 0, width);
-            const impactY = clamp(shell.y, 0, height);
-
-            shell.element.remove();
-
-            if (hitTarget) {
-                createExplosion(impactX, impactY);
-                applyExplosionDamage(
-                    impactX,
-                    impactY,
-                    shell.shooterIndex
-                );
-            } else if (hitGround) {
-                createExplosion(impactX, groundY);
-                deformTerrain(impactX, 42);
-                applyExplosionDamage(
-                    impactX,
-                    groundY,
-                    shell.shooterIndex
-                );
-            }
-
-            finishShot();
-            return;
-        }
-
-        requestAnimationFrame(frame);
+  function finishShot() {
+    if (
+      !game.running ||
+      game.paused
+    ) {
+      return;
     }
-
-    requestAnimationFrame(frame);
-}
-
-function finishShot() {
-    if (game.gameOver) return;
 
     game.busy = false;
-
-    if (game.players.some(player => player.health <= 0)) {
-        finishMatch();
-        return;
-    }
-
     game.activePlayer = 1 - game.activePlayer;
 
     if (game.activePlayer === 0) {
-        game.round++;
+      game.round++;
     }
 
-    activePlayer().moved = 0;
+    game.movementLeft[game.activePlayer] = 100;
 
-    updateHUD();
     updateControls();
     positionTanks();
     drawAimGuide();
-    saveMatch();
+    saveMatch(true);
 
-    showBattleMessage(`${activePlayer().name}'S TURN`);
-}
+    notice(
+      `${game.players[game.activePlayer]?.name || "Player"}'s turn`
+    );
+  }
 
-/* =====================================================
-   EXPLOSIONS AND DAMAGE
-   ===================================================== */
+  function finishMatch() {
+    game.running = false;
+    game.busy = false;
+    game.paused = false;
+    game.matchToken++;
 
-function createExplosion(x, y) {
-    const explosion = document.createElement("div");
+    const player1Alive = game.health[0] > 0;
+    const player2Alive = game.health[1] > 0;
 
-    explosion.className = "explosion";
-    explosion.style.left = `${x}px`;
-    explosion.style.top = `${y}px`;
+    const draw = player1Alive === player2Alive;
 
-    $("explosion-layer")?.appendChild(explosion);
+    const winner = player1Alive
+      ? game.players[0]
+      : game.players[1];
 
-    setTimeout(() => explosion.remove(), 650);
+    setText(
+      "victory-title",
+      draw ? "DRAW" : "VICTORY"
+    );
 
-    const battlefield = $("battlefield");
+    setText(
+      "winner-name",
+      draw
+        ? "Both tanks destroyed"
+        : winner?.name || "Winner"
+    );
 
-    if (battlefield) {
-        battlefield.classList.remove("screen-shake");
+    setText(
+      "victory-subtitle",
+      draw
+        ? "A close battle. Fight again!"
+        : "The battlefield belongs to you."
+    );
 
-        /*
-         * Force the animation to restart.
-         */
-        void battlefield.offsetWidth;
+    clearSavedMatch();
+    hideOverlay("pause-overlay");
 
-        battlefield.classList.add("screen-shake");
+    showScreen("victory-screen");
+  }
 
-        setTimeout(() => {
-            battlefield.classList.remove("screen-shake");
-        }, 280);
+  function hideOverlay(id) {
+    const el = $(id);
+    if (!el) return;
+
+    el.classList.remove("active");
+    el.classList.add("hidden");
+  }
+
+  function showOverlay(id) {
+    const el = $(id);
+    if (!el) return;
+
+    el.classList.remove("hidden");
+    el.classList.add("active");
+  }
+
+  function pauseMatch() {
+    if (
+      !game.running ||
+      game.paused ||
+      game.busy
+    ) {
+      if (game.busy) {
+        notice("Wait for the shell to land before pausing.");
+      }
+
+      return;
     }
-}
-
-function applyExplosionDamage(x, y, shooterIndex) {
-    const battlefield = $("battlefield");
-    if (!battlefield) return;
-
-    const fieldRect = battlefield.getBoundingClientRect();
-
-    game.players.forEach((player, index) => {
-        const tank = $(`tank${index + 1}`);
-        if (!tank) return;
-
-        const rect = tank.getBoundingClientRect();
-
-        const centerX = rect.left - fieldRect.left + rect.width / 2;
-        const centerY = rect.top - fieldRect.top + rect.height / 2;
-
-        const distance = Math.hypot(centerX - x, centerY - y);
-
-        if (distance > CONFIG.BLAST_RADIUS) return;
-
-        const damageFactor = 1 - distance / CONFIG.BLAST_RADIUS;
-
-        let damage = Math.round(
-            CONFIG.BASE_DAMAGE +
-            (CONFIG.MAX_DAMAGE - CONFIG.BASE_DAMAGE) * damageFactor
-        );
-
-        if (index === shooterIndex) {
-            damage = Math.round(damage * 0.65);
-        }
-
-        player.health = Math.max(0, player.health - damage);
-
-        createDamageNumber(
-            centerX,
-            centerY - 25,
-            `-${damage}`
-        );
-
-        showNotice(
-            `${player.name}: -${damage} HP`,
-            1400
-        );
-    });
-
-    updateHUD();
-    saveMatch();
-}
-
-function createDamageNumber(x, y, text) {
-    const element = document.createElement("div");
-
-    element.className = "damage-number";
-    element.textContent = text;
-    element.style.left = `${x}px`;
-    element.style.top = `${y}px`;
-
-    $("damage-layer")?.appendChild(element);
-
-    setTimeout(() => element.remove(), 1050);
-}
-
-/* =====================================================
-   HUD AND CONTROLS
-   ===================================================== */
-
-function updateHUD() {
-    const p1 = game.players[0];
-    const p2 = game.players[1];
-
-    setText("hud-name1", p1.name);
-    setText("hud-name2", p2.name);
-
-    setText("hp1-text", `${p1.health} / ${CONFIG.MAX_HEALTH}`);
-    setText("hp2-text", `${p2.health} / ${CONFIG.MAX_HEALTH}`);
-
-    const health1 = $("health1");
-    const health2 = $("health2");
-
-    if (health1) {
-        health1.style.width = `${p1.health}%`;
-        health1.classList.toggle("medium", p1.health <= 60 && p1.health > 30);
-        health1.classList.toggle("low", p1.health <= 30);
-    }
-
-    if (health2) {
-        health2.style.width = `${p2.health}%`;
-        health2.classList.toggle("medium", p2.health <= 60 && p2.health > 30);
-        health2.classList.toggle("low", p2.health <= 30);
-    }
-
-    setText("round-label", `ROUND ${game.round}`);
-    setText("turn-indicator", `${activePlayer().name}'S TURN`);
-    setText("movement-indicator", `Move: ${Math.round(activePlayer().moved)} / ${CONFIG.MOVE_LIMIT}`);
-
-    const angleInput = $("angle-slider");
-
-    if (angleInput) {
-        angleInput.value = activePlayer().angle;
-    }
-
-    setText("angle-value", `${activePlayer().angle}°`);
-
-    const powerSlider = $("power-slider");
-
-    if (powerSlider) {
-        powerSlider.value = activePlayer().power;
-    }
-
-    setText("power-value", `${activePlayer().power}%`);
-}
-
-function updateControls() {
-    const enabled = canAct();
-
-    [
-        "move-left-btn",
-        "move-right-btn",
-        "fire-btn",
-        "power-slider",
-        "angle-slider"
-    ].forEach(id => {
-        const element = $(id);
-        if (element) element.disabled = !enabled;
-    });
-
-    const player = activePlayer();
-
-    if ($("movement-time")) {
-        $("movement-time").textContent =
-            `${Math.max(0, CONFIG.MOVE_LIMIT - Math.round(player.moved))} px`;
-    }
-
-    updateHUD();
-}
-
-/* =====================================================
-   PAUSE MENU
-   ===================================================== */
-
-function pauseMatch() {
-    if (!game.running || game.gameOver || game.paused) return;
 
     game.paused = true;
 
-    $("pause-overlay")?.classList.add("active");
-
+    showOverlay("pause-overlay");
     updateControls();
-    drawAimGuide();
-    saveMatch();
-}
+  }
 
-function resumeMatch() {
-    if (game.gameOver) return;
-
+  function resumeMatch() {
     game.paused = false;
 
-    $("pause-overlay")?.classList.remove("active");
+    hideOverlay("pause-overlay");
 
     updateControls();
     drawAimGuide();
-}
+  }
 
-function openConfirmation(title, message, action) {
+  function askConfirm(title, message, action) {
     setText("confirm-title", title);
     setText("confirm-message", message);
 
     game.confirmAction = action;
 
-    $("confirm-overlay")?.classList.add("active");
-}
+    showOverlay("confirm-overlay");
+  }
 
-function closeConfirmation() {
-    $("confirm-overlay")?.classList.remove("active");
-    game.confirmAction = null;
-}
+  function leaveMatch() {
+    game.matchToken++;
 
-function restartMatch() {
-    closeConfirmation();
-
-    $("pause-overlay")?.classList.remove("active");
-
-    game.paused = false;
     game.running = false;
+    game.paused = false;
+    game.busy = false;
+
+    hideOverlay("pause-overlay");
+    hideOverlay("confirm-overlay");
+
+    clearSavedMatch();
+
+    showScreen("main-menu");
+  }
+
+  function restartMatch() {
+    game.matchToken++;
+
+    game.running = false;
+    game.busy = false;
+    game.paused = false;
+
+    hideOverlay("pause-overlay");
+    hideOverlay("confirm-overlay");
 
     clearSavedMatch();
 
     startMatch();
-}
+  }
 
-function leaveMatch() {
-    closeConfirmation();
+  function openSettings() {
+    game.settingsReturnScreen = game.screen;
 
-    $("pause-overlay")?.classList.remove("active");
+    showScreen("settings-screen");
 
-    game.running = false;
-    game.paused = false;
-    game.busy = false;
+    const volume = $("master-volume");
 
-    clearSavedMatch();
+    if (volume) {
+      volume.value = String(
+        Math.round(game.settings.volume * 100)
+      );
+    }
 
-    showScreen("main-menu");
-    updateResumeButton();
-}
+    setText(
+      "volume-value",
+      `${Math.round(game.settings.volume * 100)}%`
+    );
 
-/* =====================================================
-   VICTORY
-   ===================================================== */
+    if ($("music-toggle")) {
+      $("music-toggle").checked = game.settings.music;
+    }
 
-function finishMatch() {
-    game.gameOver = true;
-    game.running = false;
-    game.busy = false;
-    game.paused = false;
+    if ($("effects-toggle")) {
+      $("effects-toggle").checked = game.settings.effects;
+    }
+  }
 
-    $("pause-overlay")?.classList.remove("active");
-    $("confirm-overlay")?.classList.remove("active");
+  function closeSettings() {
+    showScreen(
+      game.settingsReturnScreen || "main-menu"
+    );
 
-    const winnerIndex = game.players[0].health > 0 ? 0 : 1;
-    const winner = game.players[winnerIndex];
+    if (game.screen === "battle-screen") {
+      updateControls();
+      drawAimGuide();
+    }
+  }
 
-    setText("winner-name", winner.name);
-    setText("victory-title", "VICTORY!");
-    setText("victory-subtitle", "The battlefield belongs to you.");
+  function startMusic() {
+    stopMusic();
 
-    clearSavedMatch();
-
-    showScreen("victory-screen");
-}
-
-/* =====================================================
-   SAVE AND RESUME
-   ===================================================== */
-
-function saveMatch() {
     if (
-        !game.running ||
-        game.gameOver ||
-        game.screen !== "battle-screen"
+      !game.settings.music ||
+      game.settings.volume <= 0
     ) {
-        return;
+      return;
     }
 
-    const snapshot = {
-        version: 1,
-        players: game.players.map(player => ({ ...player })),
-        activePlayer: game.activePlayer,
-        round: game.round,
-        terrain: game.terrain,
-        savedAt: Date.now()
+    const ctx = ensureAudio();
+    if (!ctx) return;
+
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.value = 55;
+
+    gain.gain.value =
+      0.018 * game.settings.volume;
+
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+
+    oscillator.start();
+
+    ambientTimer = {
+      oscillator,
+      gain
     };
+  }
 
-    try {
+  function stopMusic() {
+    if (
+      ambientTimer &&
+      ambientTimer.oscillator &&
+      game.audioContext
+    ) {
+      try {
+        ambientTimer.gain.gain.setTargetAtTime(
+          0.0001,
+          game.audioContext.currentTime,
+          0.05
+        );
+
+        ambientTimer.oscillator.stop(
+          game.audioContext.currentTime + 0.25
+        );
+      } catch (_) {}
+    }
+
+    ambientTimer = null;
+  }
+
+  function updateTankPreviews() {
+    const tank1 = TANKS[game.selectedTanks[0]];
+    const tank2 = TANKS[game.selectedTanks[1]];
+
+    setText("tank1-name", tank1.name);
+    setText("tank2-name", tank2.name);
+
+    setText("tank1-description", tank1.description);
+    setText("tank2-description", tank2.description);
+
+    const previews = [
+      $("tank1-preview"),
+      $("tank2-preview")
+    ];
+
+    previews.forEach((preview, i) => {
+      if (!preview) return;
+
+      preview.dataset.tank =
+        TANKS[game.selectedTanks[i]].name.toLowerCase();
+
+      const hull = preview.querySelector(".preview-hull");
+      const turret = preview.querySelector(".preview-turret");
+
+      if (hull) {
+        hull.style.filter =
+          `brightness(${i === 0 ? 1.05 : 0.9})`;
+      }
+
+      if (turret) {
+        turret.style.transform = "rotate(-8deg)";
+      }
+    });
+  }
+
+  function cycleTank(player, direction) {
+    game.selectedTanks[player] =
+      (
+        game.selectedTanks[player] +
+        direction +
+        TANKS.length
+      ) % TANKS.length;
+
+    updateTankPreviews();
+  }
+
+  function bindEvents() {
+    $("play-btn")?.addEventListener("click", () => {
+      ensureAudio();
+      showScreen("mode-screen");
+    });
+
+    $("resume-match-btn")?.addEventListener(
+      "click",
+      resumeSavedMatch
+    );
+
+    $("settings-btn")?.addEventListener(
+      "click",
+      openSettings
+    );
+
+    $("how-to-btn")?.addEventListener("click", () => {
+      showScreen("how-to-screen");
+    });
+
+    document.querySelectorAll(".back-to-menu-btn")
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          showScreen("main-menu");
+        });
+      });
+
+    $("local-match-btn")?.addEventListener("click", () => {
+      game.mode = "local";
+      updateTankPreviews();
+      showScreen("setup-screen");
+    });
+
+    $("online-match-btn")?.addEventListener("click", () => {
+      game.mode = "online";
+      showScreen("online-screen");
+    });
+
+    $("online-back-btn")?.addEventListener("click", () => {
+      showScreen("mode-screen");
+    });
+
+    $("setup-back-btn")?.addEventListener("click", () => {
+      showScreen("mode-screen");
+    });
+
+    $("tank1-prev")?.addEventListener("click", () => {
+      cycleTank(0, -1);
+    });
+
+    $("tank1-next")?.addEventListener("click", () => {
+      cycleTank(0, 1);
+    });
+
+    $("tank2-prev")?.addEventListener("click", () => {
+      cycleTank(1, -1);
+    });
+
+    $("tank2-next")?.addEventListener("click", () => {
+      cycleTank(1, 1);
+    });
+
+    $("start-battle-btn")?.addEventListener(
+      "click",
+      startMatch
+    );
+
+    $("how-to-back-btn")?.addEventListener("click", () => {
+      showScreen("main-menu");
+    });
+
+    $("pause-btn")?.addEventListener(
+      "click",
+      pauseMatch
+    );
+
+    $("resume-btn")?.addEventListener(
+      "click",
+      resumeMatch
+    );
+
+    $("pause-settings-btn")?.addEventListener(
+      "click",
+      openSettings
+    );
+
+    $("restart-btn")?.addEventListener("click", () => {
+      askConfirm(
+        "RESTART MATCH?",
+        "Your current battle progress will be lost.",
+        restartMatch
+      );
+    });
+
+    $("leave-match-btn")?.addEventListener("click", () => {
+      askConfirm(
+        "LEAVE MATCH?",
+        "Leaving will discard this saved battle.",
+        leaveMatch
+      );
+    });
+
+    $("confirm-yes-btn")?.addEventListener("click", () => {
+      const action = game.confirmAction;
+
+      game.confirmAction = null;
+
+      hideOverlay("confirm-overlay");
+
+      if (typeof action === "function") {
+        action();
+      }
+    });
+
+    $("confirm-cancel-btn")?.addEventListener("click", () => {
+      game.confirmAction = null;
+      hideOverlay("confirm-overlay");
+    });
+
+    $("rematch-btn")?.addEventListener(
+      "click",
+      startMatch
+    );
+
+    $("main-menu-btn")?.addEventListener("click", () => {
+      showScreen("main-menu");
+    });
+
+    $("settings-back-btn")?.addEventListener(
+      "click",
+      closeSettings
+    );
+
+    $("master-volume")?.addEventListener("input", (event) => {
+      game.settings.volume = clamp(
+        Number(event.target.value) / 100,
+        0,
+        1
+      );
+
+      setText(
+        "volume-value",
+        `${Math.round(game.settings.volume * 100)}%`
+      );
+
+      if (game.settings.music) {
+        startMusic();
+      }
+
+      try {
         localStorage.setItem(
-            CONFIG.SAVE_KEY,
-            JSON.stringify(snapshot)
+          "tankWarSettingsV1",
+          JSON.stringify(game.settings)
         );
+      } catch (_) {}
+    });
 
-        updateResumeButton();
-    } catch (error) {
-        console.warn("Could not save match.", error);
-    }
-}
+    $("music-toggle")?.addEventListener("change", (event) => {
+      game.settings.music = !!event.target.checked;
 
-function clearSavedMatch() {
-    try {
-        localStorage.removeItem(CONFIG.SAVE_KEY);
-    } catch (error) {
-        console.warn("Could not clear saved match.", error);
-    }
+      if (game.settings.music) {
+        startMusic();
+      } else {
+        stopMusic();
+      }
 
-    updateResumeButton();
-}
-
-function getSavedMatch() {
-    try {
-        const saved = JSON.parse(
-            localStorage.getItem(CONFIG.SAVE_KEY) || "null"
+      try {
+        localStorage.setItem(
+          "tankWarSettingsV1",
+          JSON.stringify(game.settings)
         );
+      } catch (_) {}
+    });
+
+    $("effects-toggle")?.addEventListener("change", (event) => {
+      game.settings.effects = !!event.target.checked;
+
+      try {
+        localStorage.setItem(
+          "tankWarSettingsV1",
+          JSON.stringify(game.settings)
+        );
+      } catch (_) {}
+    });
+
+    $("power-slider")?.addEventListener("input", (event) => {
+      game.power = clamp(
+        Number(event.target.value) || 65,
+        20,
+        100
+      );
+
+      updateHUD();
+      drawAimGuide();
+    });
+
+    $("move-left-btn")?.addEventListener("click", () => {
+      moveTank(-1);
+    });
+
+    $("move-right-btn")?.addEventListener("click", () => {
+      moveTank(1);
+    });
+
+    $("fire-btn")?.addEventListener(
+      "click",
+      fireShell
+    );
+
+    const field = $("battlefield");
+
+    if (field) {
+      let pointerDown = false;
+
+      field.addEventListener("pointerdown", (event) => {
+        if (
+          event.target.closest(
+            "button, input, .battle-controls, .battle-hud"
+          )
+        ) {
+          return;
+        }
+
+        pointerDown = true;
+
+        if (field.setPointerCapture) {
+          try {
+            field.setPointerCapture(event.pointerId);
+          } catch (_) {}
+        }
+
+        aimFromPointer(event);
+      });
+
+      field.addEventListener("pointermove", (event) => {
+        if (pointerDown) {
+          aimFromPointer(event);
+        }
+      });
+
+      field.addEventListener("pointerup", () => {
+        pointerDown = false;
+      });
+
+      field.addEventListener("pointercancel", () => {
+        pointerDown = false;
+      });
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        if (
+          game.screen === "battle-screen" &&
+          !game.paused
+        ) {
+          pauseMatch();
+        } else if (game.paused) {
+          resumeMatch();
+        }
+      }
+
+      if (
+        game.screen === "battle-screen" &&
+        !game.paused
+      ) {
+        if (event.key === "ArrowLeft") {
+          moveTank(-1);
+        }
+
+        if (event.key === "ArrowRight") {
+          moveTank(1);
+        }
 
         if (
-            !saved ||
-            saved.version !== 1 ||
-            !Array.isArray(saved.players) ||
-            saved.players.length !== 2
+          event.key === " " ||
+          event.key === "Enter"
         ) {
-            return null;
+          event.preventDefault();
+          fireShell();
         }
 
-        return saved;
-    } catch (error) {
-        return null;
-    }
-}
-
-function updateResumeButton() {
-    const button = $("resume-match-btn");
-    if (!button) return;
-
-    const saved = getSavedMatch();
-
-    button.disabled = !saved;
-    button.style.display = saved ? "" : "none";
-}
-
-function resumeSavedMatch() {
-    const saved = getSavedMatch();
-
-    if (!saved) {
-        showNotice("No saved match found.");
-        updateResumeButton();
-        return;
-    }
-
-    game.players = saved.players.map((player, index) => ({
-        ...player,
-        color: index === 0 ? "blue" : "red"
-    }));
-
-    game.activePlayer = clamp(saved.activePlayer || 0, 0, 1);
-    game.round = Math.max(1, saved.round || 1);
-    game.terrain = Array.isArray(saved.terrain) ? saved.terrain : [];
-
-    game.gameOver = false;
-    game.running = true;
-    game.paused = false;
-    game.busy = false;
-    game.effects = [];
-
-    showScreen("battle-screen");
-
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            drawTerrain();
-            positionTanks();
-            updateHUD();
-            updateControls();
-            drawAimGuide();
-            startEffectLoop();
-
-            showBattleMessage("MATCH RESUMED");
-        });
-    });
-}
-
-/* =====================================================
-   VISUAL EFFECT LOOP
-   ===================================================== */
-
-function startEffectLoop() {
-    if (game.animationFrame) {
-        cancelAnimationFrame(game.animationFrame);
-    }
-
-    game.lastFrame = 0;
-
-    function loop(now) {
-        if (game.screen !== "battle-screen") {
-            game.animationFrame = null;
-            return;
+        if (event.key === "ArrowUp") {
+          setAngle(
+            game.angle[game.activePlayer] + 2
+          );
         }
 
-        if (!game.paused && !game.gameOver) {
-            if (now - game.lastSaved > 1500) {
-                game.lastSaved = now;
-                saveMatch();
-            }
+        if (event.key === "ArrowDown") {
+          setAngle(
+            game.angle[game.activePlayer] - 2
+          );
         }
-
-        game.animationFrame = requestAnimationFrame(loop);
-    }
-
-    game.animationFrame = requestAnimationFrame(loop);
-}
-
-/* =====================================================
-   EVENT LISTENERS
-   ===================================================== */
-
-function bindEvents() {
-    listen("play-btn", "click", () => {
-        readPlayerNames();
-        showScreen("mode-screen");
-    });
-
-    listen("resume-match-btn", "click", resumeSavedMatch);
-
-    listen("settings-btn", "click", openSettings);
-
-    listen("how-to-btn", "click", () => {
-        showScreen("how-to-screen");
-    });
-
-    listen("local-match-btn", "click", () => {
-        readPlayerNames();
-        updateTankPreviews();
-        showScreen("setup-screen");
-    });
-
-    listen("online-match-btn", "click", () => {
-        showScreen("online-screen");
-    });
-
-    listen("online-back-btn", "click", () => {
-        showScreen("mode-screen");
-    });
-
-    listen("how-to-back-btn", "click", () => {
-        showScreen("main-menu");
-    });
-
-    listen("tank1-prev-btn", "click", () => changeTank(0, -1));
-    listen("tank1-next-btn", "click", () => changeTank(0, 1));
-    listen("tank2-prev-btn", "click", () => changeTank(1, -1));
-    listen("tank2-next-btn", "click", () => changeTank(1, 1));
-
-    listen("start-battle-btn", "click", startMatch);
-
-    listen("move-left-btn", "click", () => moveTank(-1));
-    listen("move-right-btn", "click", () => moveTank(1));
-
-    listen("fire-btn", "click", fireShell);
-
-    listen("pause-btn", "click", pauseMatch);
-    listen("resume-btn", "click", resumeMatch);
-
-    listen("pause-settings-btn", "click", openSettings);
-
-    listen("restart-btn", "click", () => {
-        openConfirmation(
-            "RESTART MATCH?",
-            "The current match progress will be lost.",
-            restartMatch
-        );
-    });
-
-    listen("leave-match-btn", "click", () => {
-        openConfirmation(
-            "LEAVE MATCH?",
-            "Your current match will be abandoned.",
-            leaveMatch
-        );
-    });
-
-    listen("confirm-cancel-btn", "click", closeConfirmation);
-
-    listen("confirm-yes-btn", "click", () => {
-        const action = game.confirmAction;
-
-        closeConfirmation();
-
-        if (typeof action === "function") {
-            action();
-        }
-    });
-
-    listen("rematch-btn", "click", startMatch);
-
-    listen("main-menu-btn", "click", () => {
-        game.running = false;
-        game.gameOver = false;
-        clearSavedMatch();
-        showScreen("main-menu");
-        updateResumeButton();
-    });
-
-    listen("settings-back-btn", "click", closeSettings);
-
-    listen("master-volume", "input", event => {
-        settings.volume = clamp(Number(event.target.value), 0, 100);
-        setText("volume-value", `${settings.volume}%`);
-        saveSettings();
-    });
-
-    listen("music-toggle", "change", event => {
-        settings.music = event.target.checked;
-        saveSettings();
-    });
-
-    listen("effects-toggle", "change", event => {
-        settings.effects = event.target.checked;
-        saveSettings();
-    });
-
-    listen("power-slider", "input", event => {
-        setPower(event.target.value);
-    });
-
-    listen("angle-slider", "input", event => {
-        setAngle(event.target.value);
+      }
     });
 
     window.addEventListener("resize", () => {
-        clearTimeout(game.resizeTimer);
-
-        game.resizeTimer = setTimeout(() => {
-            if (game.screen === "battle-screen") {
-                drawTerrain();
-                positionTanks();
-                drawAimGuide();
-            }
-        }, 120);
+      if (game.screen === "battle-screen") {
+        resizeBattlefield();
+      }
     });
 
-    document.addEventListener("visibilitychange", () => {
+    document.addEventListener(
+      "visibilitychange",
+      () => {
         if (
-            document.hidden &&
-            game.running &&
-            !game.paused &&
-            !game.gameOver
+          document.hidden &&
+          game.running &&
+          !game.paused &&
+          !game.busy
         ) {
-            pauseMatch();
+          pauseMatch();
         }
-    });
+      }
+    );
+  }
 
-    document.addEventListener("keydown", event => {
-        if (event.key === "Escape") {
-            if ($("confirm-overlay")?.classList.contains("active")) {
-                closeConfirmation();
-                return;
-            }
+  function loadSettings() {
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem("tankWarSettingsV1") || "null"
+      );
 
-            if ($("pause-overlay")?.classList.contains("active")) {
-                resumeMatch();
-                return;
-            }
+      if (saved) {
+        game.settings.volume = clamp(
+          Number(saved.volume ?? 0.45),
+          0,
+          1
+        );
 
-            if (game.screen === "battle-screen") {
-                pauseMatch();
-            }
-        }
-    });
-}
+        game.settings.music = !!saved.music;
+        game.settings.effects = saved.effects !== false;
+      }
+    } catch (_) {}
+  }
 
-/* =====================================================
-   INITIALIZATION
-   ===================================================== */
-
-function initializeGame() {
+  function init() {
     loadSettings();
     bindEvents();
-    updateResumeButton();
     updateTankPreviews();
+    updateSaveButton();
+
+    const volume = $("master-volume");
+
+    if (volume) {
+      volume.value = String(
+        Math.round(game.settings.volume * 100)
+      );
+    }
+
+    setText(
+      "volume-value",
+      `${Math.round(game.settings.volume * 100)}%`
+    );
+
+    if ($("music-toggle")) {
+      $("music-toggle").checked = game.settings.music;
+    }
+
+    if ($("effects-toggle")) {
+      $("effects-toggle").checked = game.settings.effects;
+    }
 
     showScreen("main-menu");
 
-    console.log("Tank War initialized.");
-}
+    if (
+      window.ResizeObserver &&
+      $("battlefield")
+    ) {
+      resizeObserver = new ResizeObserver(() => {
+        if (game.screen === "battle-screen") {
+          resizeBattlefield();
+        }
+      });
 
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initializeGame);
-} else {
-    initializeGame();
-}
+      resizeObserver.observe($("battlefield"));
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      init,
+      { once: true }
+    );
+  } else {
+    init();
+  }
+})();
