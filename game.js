@@ -81,9 +81,6 @@
         tank1Image: $("tank1-image"),
         tank2Image: $("tank2-image"),
 
-        tank1Cannon: $("tank1-cannon"),
-        tank2Cannon: $("tank2-cannon"),
-
         projectileLayer: $("projectile-layer"),
         effectLayer: $("effect-layer"),
 
@@ -693,19 +690,6 @@
 
             tank.style.left = `${game.x[player]}px`;
             tank.style.top = `${y - 25}px`;
-
-            const cannon = getCannonElement(player);
-
-            if (cannon) {
-                if (player === 0) {
-                    cannon.style.transform =
-                        `rotate(${-game.angle[player]}deg)`;
-                } else {
-                    cannon.style.transform =
-                        `rotate(${180 + game.angle[player]}deg)`;
-                }
-            }
-        }
     }
 
     /* =========================================
