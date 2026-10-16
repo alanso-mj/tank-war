@@ -57,7 +57,7 @@ button {
 ================================= */
 
 #main-menu {
-  background: url("assets/menu-bg.png") center / cover no-repeat;
+  background: url("menu-bg.png") center / cover no-repeat;
 }
 
 #main-menu .sun,
