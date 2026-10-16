@@ -1,4 +1,19 @@
-/* ===== TANK WAR: CLEAN STYLES ===== */
+/* ==========================================
+   TANK WAR V2 — COMPLETE RESPONSIVE STYLES
+   Portrait + Landscape + Desktop
+   ========================================== */
+
+:root {
+  --orange: #ff982f;
+  --orange-light: #ffb64f;
+  --orange-dark: #d95f20;
+  --dark: #21151b;
+  --panel: rgba(33, 21, 27, 0.94);
+  --white: #ffffff;
+  --muted: #e5d9d3;
+  --blue: #238ee8;
+  --red: #ed4942;
+}
 
 * {
   box-sizing: border-box;
@@ -7,27 +22,50 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html,
-body {
+html {
   width: 100%;
   min-height: 100%;
-  font-family: Arial, Helvetica, sans-serif;
   background: #17121a;
-  color: white;
-  overflow: hidden;
+}
+
+body {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background: #17121a;
+  color: var(--white);
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
 button {
-  cursor: pointer;
+  color: var(--white);
   border: none;
-  color: white;
+  cursor: pointer;
   touch-action: manipulation;
 }
+
+button:active {
+  transform: scale(0.98);
+  filter: brightness(1.12);
+}
+
+#app {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  position: relative;
+}
+
+/* ==========================================
+   SCREENS
+   ========================================== */
 
 .screen {
   display: none;
@@ -42,94 +80,212 @@ button {
   display: flex;
 }
 
-/* ===== MAIN MENU ===== */
+/* ==========================================
+   MAIN MENU
+   ========================================== */
 
 #main-menu {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content:center;
-  padding: 5%;
-  background: #42252b url("./menu-bg.png") center center / cover no-repeat;
+  justify-content: center;
+
+  position: relative;
+  isolation: isolate;
+  padding: 20px;
+
+  background-color: #42252b;
+  background-image: url("./menu-bg.png");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
+
+/* Hide the old CSS scenery and tank shapes.
+   The tanks are already included in menu-bg.png. */
 
 #main-menu .sun,
 #main-menu .mountain,
 #main-menu .mountain-back,
 #main-menu .mountain-front,
 #main-menu .hill,
+#main-menu .hill-left,
+#main-menu .hill-right,
 #main-menu .ground,
 #main-menu .tank-blue,
 #main-menu .tank-red {
   display: none !important;
 }
 
-.menu-panel {
+/* Menu panel */
+
+#main-menu .menu-panel {
   position: relative;
   z-index: 5;
-  width: min(40%, 390px);
-  padding: clamp(14px, 3vw, 28px);
-  border: 1px solid #ffffff50;
-  border-radius: 18px;
-  background: #21151bd9;
-  box-shadow: 0 12px 35px #0006;
-  backdrop-filter: blur(5px);
+
+  width: min(88%, 360px);
+  max-width: 100%;
+  max-height: 92%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  padding: clamp(16px, 3vh, 28px);
+  overflow-y: auto;
+
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 20px;
+
+  background: var(--panel);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
 }
 
-.menu-panel h1,
-.menu-panel h2 {
-  margin-bottom: 20px;
-  text-align: center;
-  font-size: clamp(26px, 5vw, 54px);
+/* Logo */
+
+.logo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  margin-bottom: 12px;
+
+  font-size: clamp(28px, 5vw, 48px);
   font-weight: 900;
-  line-height: 1.05;
-  color: #ff9b39;
-  text-shadow: 2px 3px 0 #6b2924;
+  line-height: 1.1;
+  text-align: center;
 }
 
-.menu-panel button,
-.screen button {
-  transition: transform 0.15s ease, filter 0.15s ease;
+.logo-orange {
+  color: var(--orange);
+}
+
+.logo-tank {
+  color: var(--white);
+  font-size: 0.8em;
+}
+
+/* Subtitle */
+
+.subtitle {
+  margin: 8px 0 18px;
+  color: var(--muted);
+  font-size: clamp(13px, 2vw, 17px);
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* Menu buttons */
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
 }
 
 .menu-panel button {
   display: block;
   width: 100%;
-  margin-top: 12px;
-  padding: 13px 10px;
-  border: 1px solid #ffd09a70;
-  border-radius: 9px;
-  background: linear-gradient(#ffad45, #e66b27);
+  min-height: 48px;
+  padding: 13px 12px;
+
+  border: 1px solid rgba(255, 220, 175, 0.75);
+  border-radius: 12px;
+
+  background: linear-gradient(
+    180deg,
+    var(--orange-light),
+    #ff922e 60%,
+    #ed7128
+  );
+
   box-shadow: 0 4px 0 #8e3c20;
-  font-size: clamp(13px, 2vw, 19px);
+
+  color: white;
+  font-size: clamp(14px, 2vw, 20px);
   font-weight: 800;
+  text-align: center;
+
+  transition: filter 0.15s ease;
 }
 
-button:active {
-  transform: scale(0.97);
-  filter: brightness(1.12);
+.menu-panel button:hover {
+  filter: brightness(1.08);
 }
 
-/* ===== OTHER SCREENS ===== */
+/* Version label */
+
+.version {
+  margin-top: 16px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 12px;
+  text-align: center;
+}
+
+/* ==========================================
+   OTHER MENU SCREENS
+   ========================================== */
 
 #mode-screen,
 #settings-screen,
 #how-to-screen,
 #online-screen {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  display: none;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 18px;
+
   padding: 24px;
+
   background:
-    linear-gradient(#21151bd9, #21151bf0),
+    linear-gradient(
+      rgba(24, 15, 22, 0.78),
+      rgba(24, 15, 22, 0.93)
+    ),
     url("./menu-bg.png") center / cover no-repeat;
+}
+
+#mode-screen.active,
+#settings-screen.active,
+#how-to-screen.active,
+#online-screen.active {
+  display: flex;
 }
 
 #mode-screen h1,
 #settings-screen h1,
 #how-to-screen h1,
 #online-screen h1 {
-  font-size: clamp(28px, 5vw, 48px);
-  color: #ffab48;
+  color: var(--orange-light);
+  font-size: clamp(26px, 5vw, 46px);
+  font-weight: 900;
+  text-align: center;
+}
+
+#mode-screen p,
+#settings-screen p,
+#how-to-screen p,
+#online-screen p {
+  max-width: 650px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.5;
   text-align: center;
 }
 
@@ -137,126 +293,282 @@ button:active {
 #settings-screen button,
 #how-to-screen button,
 #online-screen button {
-  min-width: 190px;
-  max-width: 90%;
-  padding: 14px 22px;
+  min-width: 180px;
+  max-width: 100%;
+  padding: 13px 20px;
+
   border-radius: 10px;
-  background: linear-gradient(#ffad45, #e66b27);
-  box-shadow: 0 4px 0 #8e3c20;
+  background: linear-gradient(
+    180deg,
+    var(--orange-light),
+    var(--orange-dark)
+  );
+
+  box-shadow: 0 4px 0 #78351f;
   font-weight: 800;
 }
 
-/* ===== GENERAL PANELS ===== */
+/* ==========================================
+   MODE CARDS
+   ========================================== */
 
-.menu-panel,
-#mode-screen > *,
-#settings-screen > *,
-#how-to-screen > *,
-#online-screen > * {
-  max-width: 100%;
+.mode-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  width: min(100%, 800px);
 }
 
-/* ===== LANDSCAPE MOBILE SUPPORT ===== */
+.mode-card {
+  min-width: 0;
+  padding: 22px 14px;
 
-@media (max-width: 600px) {
-  #main-menu {
-    padding: 4%;
-  }
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
 
-  .menu-panel {
-    width: min(48%, 300px);
-    padding: 12px;
-  }
-
-  .menu-panel h1,
-  .menu-panel h2 {
-    margin-bottom: 12px;
-    font-size: clamp(23px, 6vw, 36px);
-  }
-
-  .menu-panel button {
-    margin-top: 9px;
-    padding: 11px 6px;
-  }
+  background: rgba(33, 21, 27, 0.92);
+  text-align: center;
 }
 
-@media (orientation: portrait) {
-  #main-menu {
-    padding: 12px;
-  }
-
-  .menu-panel {
-    width: min(75%, 330px);
-  }
+.mode-card h2 {
+  margin-bottom: 10px;
+  color: var(--orange-light);
+  font-size: clamp(17px, 2.5vw, 25px);
 }
-/* PORTRAIT + LANDSCAPE SUPPORT */
 
-#main-menu {
+.mode-card p {
+  margin-bottom: 15px;
+}
+
+/* ==========================================
+   FORMS AND INPUTS
+   ========================================== */
+
+input,
+select {
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
-  box-sizing: border-box;
-  background: url("./menu-bg.png") center / cover no-repeat;
+  min-width: 0;
+  min-height: 44px;
+
+  padding: 10px 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 9px;
+
+  background: rgba(15, 12, 17, 0.9);
+  color: white;
 }
+
+input:focus,
+select:focus {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ==========================================
+   SHARED CARDS AND PANELS
+   ========================================== */
+
+.panel,
+.card,
+.player-panel,
+.tank-card {
+  min-width: 0;
+  padding: 16px;
+
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 14px;
+
+  background: rgba(33, 21, 27, 0.93);
+}
+
+.card h2,
+.panel h2,
+.player-panel h2 {
+  margin-bottom: 12px;
+  color: var(--orange-light);
+}
+
+/* ==========================================
+   GENERAL GAME BUTTONS
+   ========================================== */
+
+.primary-button,
+.start-button,
+.fire-button {
+  padding: 13px 20px;
+  border-radius: 10px;
+
+  background: linear-gradient(
+    180deg,
+    var(--orange-light),
+    var(--orange-dark)
+  );
+
+  box-shadow: 0 4px 0 #78351f;
+  font-weight: 900;
+}
+
+.secondary-button,
+.back-button {
+  padding: 12px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================
+   RESPONSIVE: PORTRAIT
+   ========================================== */
 
 @media (orientation: portrait) {
   #main-menu {
-    justify-content: center;
-    align-items: center;
+    padding: 16px;
+    background-position: center;
+  }
+
+  #main-menu .menu-panel {
+    width: min(88%, 360px);
+    max-height: 90%;
     padding: 20px;
   }
 
-  .menu-panel {
-    width: min(85%, 360px);
+  .logo {
+    font-size: clamp(28px, 8vw, 42px);
+  }
+
+  .menu-buttons {
+    gap: 12px;
   }
 
   .menu-panel button {
-    width: 100%;
+    min-height: 48px;
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  .mode-cards {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+    overflow-y: auto;
+  }
+
+  #mode-screen,
+  #settings-screen,
+  #how-to-screen,
+  #online-screen {
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding: 22px 16px;
   }
 }
 
-@media (orientation: landscape) {
+/* ==========================================
+   RESPONSIVE: LANDSCAPE PHONE
+   ========================================== */
+
+@media (orientation: landscape) and (max-height: 600px) {
   #main-menu {
+    padding: 12px 4%;
+  }
+
+  #main-menu .menu-panel {
+    width: min(42vw, 380px);
+    max-height: 94%;
+    padding: 12px 16px;
+    border-radius: 14px;
+  }
+
+  .logo {
+    margin-bottom: 5px;
+    font-size: clamp(22px, 4vw, 34px);
+  }
+
+  .subtitle {
+    margin: 4px 0 8px;
+    font-size: 12px;
+  }
+
+  .menu-buttons {
+    gap: 8px;
+  }
+
+  .menu-panel button {
+    min-height: 36px;
+    padding: 8px;
+    font-size: clamp(12px, 2vw, 17px);
+  }
+
+  .version {
+    margin-top: 8px;
+    font-size: 10px;
+  }
+
+  #mode-screen,
+  #settings-screen,
+  #how-to-screen,
+  #online-screen {
     justify-content: flex-start;
-    align-items: center;
+    overflow-y: auto;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  #mode-screen h1,
+  #settings-screen h1,
+  #how-to-screen h1,
+  #online-screen h1 {
+    font-size: clamp(22px, 4vw, 32px);
+  }
+}
+
+/* ==========================================
+   RESPONSIVE: DESKTOP
+   ========================================== */
+
+@media (min-width: 900px) and (orientation: landscape) {
+  #main-menu {
     padding: 4%;
   }
 
-  .menu-panel {
-    width: min(40%, 390px);
-  }
-}
-/* FIT MENU TO PHONE SCREEN */
-#main-menu {
-  min-height: 100dvh;
-  overflow-y: auto;
-}
-
-.menu-panel {
-  max-height: 90dvh;
-  overflow-y: auto;
-}
-
-@media (orientation: portrait) {
-  .menu-panel {
-    width: min(88%, 360px);
-  }
-}
-
-@media (orientation: landscape) {
-  .menu-panel {
-    width: min(40%, 390px);
-    padding: 12px;
+  #main-menu .menu-panel {
+    width: min(36vw, 430px);
+    padding: 26px;
   }
 
-  .menu-panel h1,
-  .menu-panel h2 {
-    font-size: clamp(20px, 3vw, 32px);
-    margin-bottom: 8px;
+  .logo {
+    font-size: clamp(36px, 4vw, 52px);
   }
 
   .menu-panel button {
-    margin-top: 8px;
-    padding: 9px;
+    min-height: 52px;
+    font-size: 19px;
+  }
+}
+
+/* ==========================================
+   ACCESSIBILITY
+   ========================================== */
+
+button:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }
