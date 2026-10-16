@@ -1,41 +1,43 @@
-/* ==========================================
-   TANK WAR V2 — COMPLETE RESPONSIVE STYLES
-   Portrait + Landscape + Desktop
-   ========================================== */
+/* =========================================
+   TANK WAR V2 — COMPLETE STYLESHEET
+   ========================================= */
 
 :root {
-  --orange: #ff982f;
-  --orange-light: #ffb64f;
-  --orange-dark: #d95f20;
-  --dark: #21151b;
-  --panel: rgba(33, 21, 27, 0.94);
-  --white: #ffffff;
-  --muted: #e5d9d3;
+  --bg: #171923;
+  --panel: #242735;
+  --panel-light: #303547;
+  --text: #ffffff;
+  --muted: #bdc3d4;
+  --orange: #ff9d36;
+  --orange-dark: #df7023;
   --blue: #238ee8;
+  --blue-dark: #15548b;
   --red: #ed4942;
+  --red-dark: #862c32;
+  --green: #40d889;
+  --border: rgba(255, 255, 255, 0.12);
 }
 
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
   -webkit-tap-highlight-color: transparent;
 }
 
-html {
+html,
+body {
   width: 100%;
-  min-height: 100%;
-  background: #17121a;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
-  width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow-x: hidden;
-  background: #17121a;
-  color: var(--white);
+  background: var(--bg);
+  color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 button,
@@ -45,645 +47,358 @@ select {
 }
 
 button {
-  color: var(--white);
+  color: white;
   border: none;
   cursor: pointer;
   touch-action: manipulation;
 }
 
-button:active {
-  transform: scale(0.98);
-  filter: brightness(1.12);
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+input,
+select {
+  max-width: 100%;
 }
 
 #app {
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100%;
+  height: 100dvh;
   position: relative;
+  overflow: hidden;
+  background: var(--bg);
 }
-
-/* ==========================================
-   SCREENS
-   ========================================== */
 
 .screen {
   display: none;
-  position: relative;
+  position: absolute;
+  inset: 0;
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow: hidden;
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg);
 }
 
 .screen.active {
   display: flex;
 }
 
-/* ==========================================
+/* =========================================
+   BUTTONS
+   ========================================= */
+
+.primary-btn,
+.secondary-btn,
+.back-btn,
+.mode-card,
+.control-btn,
+.fire-btn,
+.pause-btn {
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease,
+    background 0.12s ease;
+}
+
+.primary-btn:active,
+.secondary-btn:active,
+.control-btn:active,
+.fire-btn:active,
+.mode-card:active {
+  transform: scale(0.97);
+}
+
+.primary-btn {
+  min-height: 48px;
+  padding: 13px 22px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffb447, #ff7b2c);
+  color: #25170e;
+  font-weight: 900;
+  letter-spacing: 1px;
+  box-shadow: 0 5px 0 #a84d1b;
+}
+
+.secondary-btn {
+  min-height: 44px;
+  padding: 11px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  font-weight: 800;
+}
+
+.back-btn {
+  min-height: 40px;
+  padding: 9px 13px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.1);
+  font-weight: 800;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 3px;
+}
+
+/* =========================================
    MAIN MENU
-   ========================================== */
+   ========================================= */
 
 #main-menu {
-  width: 100%;
-  height: 100vh;
-  height: 100dvh;
-  min-height: 0;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-
-  position: relative;
-  isolation: isolate;
-  padding: 20px;
-
-  background-color: #42252b;
-  background-image: url("./menu-bg.png");
+  align-items: flex-start;
+  padding: clamp(18px, 4vw, 60px);
+  background-color: #6e2833;
+  background-image:
+    linear-gradient(
+      90deg,
+      rgba(23, 18, 30, 0.78) 0%,
+      rgba(23, 18, 30, 0.35) 46%,
+      rgba(23, 18, 30, 0.03) 100%
+    ),
+    url("./menu-bg.png");
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
 }
 
-/* Hide the old CSS scenery and tank shapes.
-   The tanks are already included in menu-bg.png. */
-
-#main-menu .sun,
-#main-menu .mountain,
-#main-menu .mountain-back,
-#main-menu .mountain-front,
-#main-menu .hill,
-#main-menu .hill-left,
-#main-menu .hill-right,
-#main-menu .ground,
-#main-menu .tank-blue,
-#main-menu .tank-red {
-  display: none !important;
-}
-
-/* Menu panel */
-
-#main-menu .menu-panel {
-  position: relative;
-  z-index: 5;
-
-  width: min(88%, 360px);
-  max-width: 100%;
-  max-height: 92%;
-
+.menu-panel {
+  width: min(360px, 88%);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-
-  padding: clamp(16px, 3vh, 28px);
-  overflow-y: auto;
-
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 20px;
-
-  background: var(--panel);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
-
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
+  align-items: stretch;
+  gap: 15px;
+  margin-top: auto;
+  margin-bottom: auto;
+  padding: clamp(18px, 4vw, 30px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 22px;
+  background: rgba(22, 21, 31, 0.74);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
 }
 
-/* Logo */
-
-.logo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-
-  margin-bottom: 12px;
-
-  font-size: clamp(28px, 5vw, 48px);
-  font-weight: 900;
-  line-height: 1.1;
-  text-align: center;
-}
-
-.logo-orange {
-  color: var(--orange);
-}
-
-.logo-tank {
-  color: var(--white);
-  font-size: 0.8em;
-}
-
-/* Subtitle */
-
-.subtitle {
-  margin: 8px 0 18px;
-  color: var(--muted);
-  font-size: clamp(13px, 2vw, 17px);
-  line-height: 1.4;
-  text-align: center;
-}
-
-/* Menu buttons */
-
-.menu-buttons {
+.game-logo {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  width: 100%;
+  align-items: flex-start;
+  line-height: 0.88;
+  margin-bottom: 18px;
+  font-weight: 1000;
+  font-style: italic;
 }
 
-.menu-panel button {
-  display: block;
-  width: 100%;
-  min-height: 48px;
-  padding: 13px 12px;
-
-  border: 1px solid rgba(255, 220, 175, 0.75);
-  border-radius: 12px;
-
-  background: linear-gradient(
-    180deg,
-    var(--orange-light),
-    #ff922e 60%,
-    #ed7128
-  );
-
-  box-shadow: 0 4px 0 #8e3c20;
-
+.game-logo span {
+  font-size: clamp(45px, 10vw, 76px);
+  letter-spacing: -3px;
   color: white;
-  font-size: clamp(14px, 2vw, 20px);
-  font-weight: 800;
+  text-shadow: 3px 4px 0 #6c3526;
+}
+
+.game-logo strong {
+  font-size: clamp(48px, 11vw, 82px);
+  letter-spacing: -3px;
+  color: var(--orange);
+  text-shadow: 3px 4px 0 #6c3526;
+}
+
+.game-logo small {
+  margin-top: 15px;
+  color: #f9d9b3;
+  font-size: 11px;
+  letter-spacing: 3px;
+  line-height: 1.4;
+}
+
+/* =========================================
+   SCREEN HEADERS
+   ========================================= */
+
+.screen-header {
+  width: 100%;
+  max-width: 1050px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 15px;
+  padding: 18px;
+}
+
+.screen-header h1 {
+  margin: 0;
+  font-size: clamp(20px, 5vw, 32px);
   text-align: center;
-
-  transition: filter 0.15s ease;
+  letter-spacing: 1px;
 }
 
-.menu-panel button:hover {
-  filter: brightness(1.08);
+.screen-header .back-btn {
+  justify-self: start;
 }
 
-/* Version label */
-
-.version {
-  margin-top: 16px;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 12px;
-  text-align: center;
-}
-
-/* ==========================================
-   OTHER MENU SCREENS
-   ========================================== */
+/* =========================================
+   MODE SELECTION
+   ========================================= */
 
 #mode-screen,
 #settings-screen,
 #how-to-screen,
-#online-screen {
-  width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+#online-screen,
+#local-setup-screen,
+#vs-screen {
+  padding-bottom: 24px;
+}
 
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-
-  padding: 24px;
-
+#mode-screen {
   background:
-    linear-gradient(
-      rgba(24, 15, 22, 0.78),
-      rgba(24, 15, 22, 0.93)
-    ),
-    url("./menu-bg.png") center / cover no-repeat;
+    radial-gradient(ellipse at top, #383345 0%, #171923 65%);
 }
 
-#mode-screen.active,
-#settings-screen.active,
-#how-to-screen.active,
-#online-screen.active {
-  display: flex;
-}
-
-#mode-screen h1,
-#settings-screen h1,
-#how-to-screen h1,
-#online-screen h1 {
-  color: var(--orange-light);
-  font-size: clamp(26px, 5vw, 46px);
-  font-weight: 900;
-  text-align: center;
-}
-
-#mode-screen p,
-#settings-screen p,
-#how-to-screen p,
-#online-screen p {
-  max-width: 650px;
-  color: var(--muted);
-  font-size: 16px;
-  line-height: 1.5;
-  text-align: center;
-}
-
-#mode-screen button,
-#settings-screen button,
-#how-to-screen button,
-#online-screen button {
-  min-width: 180px;
-  max-width: 100%;
-  padding: 13px 20px;
-
-  border-radius: 10px;
-  background: linear-gradient(
-    180deg,
-    var(--orange-light),
-    var(--orange-dark)
-  );
-
-  box-shadow: 0 4px 0 #78351f;
-  font-weight: 800;
-}
-
-/* ==========================================
-   MODE CARDS
-   ========================================== */
-
-.mode-cards {
+.mode-options {
+  width: min(900px, 92%);
+  flex: 1;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-
-  width: min(100%, 800px);
+  align-content: center;
+  gap: 18px;
+  padding: 18px 0;
 }
 
 .mode-card {
-  min-width: 0;
-  padding: 22px 14px;
-
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 16px;
-
-  background: rgba(33, 21, 27, 0.92);
-  text-align: center;
-}
-
-.mode-card h2 {
-  margin-bottom: 10px;
-  color: var(--orange-light);
-  font-size: clamp(17px, 2.5vw, 25px);
-}
-
-.mode-card p {
-  margin-bottom: 15px;
-}
-
-/* ==========================================
-   FORMS AND INPUTS
-   ========================================== */
-
-input,
-select {
-  width: 100%;
-  min-width: 0;
-  min-height: 44px;
-
-  padding: 10px 12px;
-
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 9px;
-
-  background: rgba(15, 12, 17, 0.9);
-  color: white;
-}
-
-input:focus,
-select:focus {
-  outline: 2px solid var(--orange);
-  outline-offset: 2px;
-}
-
-label {
-  display: block;
-  margin-bottom: 6px;
-  color: var(--muted);
-  font-size: 14px;
-}
-
-/* ==========================================
-   SHARED CARDS AND PANELS
-   ========================================== */
-
-.panel,
-.card,
-.player-panel,
-.tank-card {
-  min-width: 0;
-  padding: 16px;
-
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 14px;
-
-  background: rgba(33, 21, 27, 0.93);
-}
-
-.card h2,
-.panel h2,
-.player-panel h2 {
-  margin-bottom: 12px;
-  color: var(--orange-light);
-}
-
-/* ==========================================
-   GENERAL GAME BUTTONS
-   ========================================== */
-
-.primary-button,
-.start-button,
-.fire-button {
-  padding: 13px 20px;
-  border-radius: 10px;
-
-  background: linear-gradient(
-    180deg,
-    var(--orange-light),
-    var(--orange-dark)
-  );
-
-  box-shadow: 0 4px 0 #78351f;
-  font-weight: 900;
-}
-
-.secondary-button,
-.back-button {
-  padding: 12px 18px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-/* ==========================================
-   RESPONSIVE: PORTRAIT
-   ========================================== */
-
-@media (orientation: portrait) {
-  #main-menu {
-    padding: 16px;
-    background-position: center;
-  }
-
-  #main-menu .menu-panel {
-    width: min(88%, 360px);
-    max-height: 90%;
-    padding: 20px;
-  }
-
-  .logo {
-    font-size: clamp(28px, 8vw, 42px);
-  }
-
-  .menu-buttons {
-    gap: 12px;
-  }
-
-  .menu-panel button {
-    min-height: 48px;
-    padding: 12px;
-    font-size: 16px;
-  }
-
-  .mode-cards {
-    grid-template-columns: 1fr;
-    max-width: 400px;
-    overflow-y: auto;
-  }
-
-  #mode-screen,
-  #settings-screen,
-  #how-to-screen,
-  #online-screen {
-    justify-content: flex-start;
-    overflow-y: auto;
-    padding: 22px 16px;
-  }
-}
-
-/* ==========================================
-   RESPONSIVE: LANDSCAPE PHONE
-   ========================================== */
-
-@media (orientation: landscape) and (max-height: 600px) {
-  #main-menu {
-    padding: 12px 4%;
-  }
-
-  #main-menu .menu-panel {
-    width: min(42vw, 380px);
-    max-height: 94%;
-    padding: 12px 16px;
-    border-radius: 14px;
-  }
-
-  .logo {
-    margin-bottom: 5px;
-    font-size: clamp(22px, 4vw, 34px);
-  }
-
-  .subtitle {
-    margin: 4px 0 8px;
-    font-size: 12px;
-  }
-
-  .menu-buttons {
-    gap: 8px;
-  }
-
-  .menu-panel button {
-    min-height: 36px;
-    padding: 8px;
-    font-size: clamp(12px, 2vw, 17px);
-  }
-
-  .version {
-    margin-top: 8px;
-    font-size: 10px;
-  }
-
-  #mode-screen,
-  #settings-screen,
-  #how-to-screen,
-  #online-screen {
-    justify-content: flex-start;
-    overflow-y: auto;
-    padding: 12px;
-    gap: 10px;
-  }
-
-  #mode-screen h1,
-  #settings-screen h1,
-  #how-to-screen h1,
-  #online-screen h1 {
-    font-size: clamp(22px, 4vw, 32px);
-  }
-}
-
-/* ==========================================
-   RESPONSIVE: DESKTOP
-   ========================================== */
-
-@media (min-width: 900px) and (orientation: landscape) {
-  #main-menu {
-    padding: 4%;
-  }
-
-  #main-menu .menu-panel {
-    width: min(36vw, 430px);
-    padding: 26px;
-  }
-
-  .logo {
-    font-size: clamp(36px, 4vw, 52px);
-  }
-
-  .menu-panel button {
-    min-height: 52px;
-    font-size: 19px;
-  }
-}
-
-/* ==========================================
-   ACCESSIBILITY
-   ========================================== */
-
-button:focus-visible {
-  outline: 3px solid white;
-  outline-offset: 3px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-  }
-}
-/* LOCAL MATCH SETUP */
-
-#local-setup-screen {
+  min-height: 190px;
+  padding: 24px 14px;
+  display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  gap: 14px;
-  padding: 22px;
-  overflow-y: auto;
-  background:
-    linear-gradient(#21151be8, #21151bf2),
-    url("./menu-bg.png") center / cover no-repeat;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #33394b, #222532);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
-#local-setup-screen > h1,
-#vs-screen > h1,
-#battle-screen > h1 {
-  color: #ffb64f;
-  font-size: clamp(26px, 5vw, 46px);
+.mode-card strong {
+  font-size: clamp(16px, 3vw, 23px);
+}
+
+.mode-card small {
+  color: var(--muted);
+  font-size: 12px;
   text-align: center;
 }
 
-#local-setup-screen > p,
-#vs-screen > p,
-#battle-screen > p {
-  text-align: center;
-  line-height: 1.5;
+.mode-icon {
+  font-size: 42px;
+}
+
+/* =========================================
+   LOCAL SETUP
+   ========================================= */
+
+.setup-container {
+  width: min(850px, 94%);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 12px;
+  margin: auto 0;
+  padding: 12px 0 24px;
 }
 
 .player-setup {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  width: min(100%, 850px);
-}
-
-.player-panel {
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  min-width: 0;
+  gap: 11px;
+  padding: clamp(12px, 3vw, 24px);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--panel);
 }
 
-.player-panel h2 {
-  font-size: clamp(16px, 2.5vw, 24px);
+.player-setup h2 {
+  margin: 0;
+  font-size: clamp(16px, 3vw, 23px);
 }
 
-.player-one {
-  border-color: #238ee8;
+.blue-player h2 {
+  color: #68bcff;
 }
 
-.player-two {
-  border-color: #ed4942;
+.red-player h2 {
+  color: #ff827b;
 }
 
 .tank-preview {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 80px;
-  margin-top: 6px;
+  min-height: 65px;
+  display: grid;
+  place-items: center;
   border-radius: 12px;
-  background: #17121a;
-  font-size: 44px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 38px;
 }
 
-.blue-preview {
-  border: 2px solid #238ee8;
+.setup-vs {
+  align-self: center;
+  font-size: 21px;
+  font-weight: 1000;
+  color: var(--orange);
 }
 
-.red-preview {
-  border: 2px solid #ed4942;
+.player-setup label,
+.settings-card label,
+.combat-controls label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
 }
 
-.green-preview {
-  border: 2px solid #57bf70;
+.player-setup input,
+.player-setup select {
+  width: 100%;
+  min-width: 0;
+  height: 43px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #171923;
+  color: white;
 }
 
-.orange-preview {
-  border: 2px solid #ff982f;
+#start-battle-btn {
+  width: min(340px, 90%);
+  margin: 0 auto 10px;
 }
 
-.setup-buttons {
-  display: flex;
-  flex-wrap: wrap;
+/* =========================================
+   VS SCREEN
+   ========================================= */
+
+#vs-screen {
   justify-content: center;
-  gap: 12px;
-}
-
-#setup-error {
-  color: #ff8a80;
-  text-align: center;
-}
-
-#vs-screen,
-#battle-screen {
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 22px;
-  padding: 24px;
   background:
-    linear-gradient(#21151be8, #21151bf2),
-    url("./menu-bg.png") center / cover no-repeat;
+    radial-gradient(ellipse at center, #343449 0%, #171923 75%);
 }
 
 .versus-container {
-  display: flex;
+  width: min(850px, 94%);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: center;
-  gap: clamp(16px, 5vw, 70px);
-  width: 100%;
+  gap: 12px;
+  margin: auto 0 30px;
 }
 
 .versus-player {
@@ -692,76 +407,36 @@ button:focus-visible {
 }
 
 .versus-player h2 {
-  margin-top: 10px;
   overflow-wrap: anywhere;
+  font-size: clamp(15px, 3vw, 25px);
+}
+
+.versus-tank {
+  font-size: clamp(65px, 15vw, 115px);
+  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.3));
 }
 
 .versus-text {
-  color: #ff982f;
-  font-size: clamp(30px, 7vw, 70px);
-  font-weight: 900;
+  color: var(--orange);
+  font-size: clamp(25px, 6vw, 45px);
+  font-weight: 1000;
   font-style: italic;
 }
 
-@media (orientation: portrait) {
-  #local-setup-screen {
-    justify-content: flex-start;
-  }
-
-  .player-setup {
-    grid-template-columns: 1fr;
-    max-width: 420px;
-  }
-
-  .tank-preview {
-    min-height: 60px;
-  }
-
-  #vs-screen,
-  #battle-screen {
-    overflow-y: auto;
-  }
+#vs-continue-btn {
+  width: min(340px, 90%);
+  margin: 0 auto auto;
 }
 
-@media (orientation: landscape) and (max-height: 600px) {
-  #local-setup-screen {
-    justify-content: flex-start;
-    padding: 12px;
-    gap: 8px;
-  }
-
-  .player-setup {
-    width: min(100%, 850px);
-    gap: 10px;
-  }
-
-  .player-panel {
-    padding: 10px;
-    gap: 6px;
-  }
-
-  .tank-preview {
-    min-height: 45px;
-    font-size: 30px;
-  }
-
-  #vs-screen,
-  #battle-screen {
-    gap: 10px;
-    padding: 12px;
-  }
-}
-/* ===== PLAYABLE BATTLEFIELD ===== */
+/* =========================================
+   BATTLE SCREEN LAYOUT
+   ========================================= */
 
 #battle-screen {
-  width: 100%;
-  height: 100vh;
-  height: 100dvh;
-  min-height: 0;
   display: none;
   flex-direction: column;
-  background: #251922;
   overflow: hidden;
+  background: #1a1c26;
 }
 
 #battle-screen.active {
@@ -769,112 +444,194 @@ button:focus-visible {
 }
 
 .battle-hud {
-  z-index: 5;
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  min-height: 69px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 10px;
-  width: 100%;
-  padding: 8px 12px;
-  background: #21151b;
+  padding: 10px 52px 10px 12px;
+  background: linear-gradient(180deg, #272b39, #1c1f2a);
+  border-bottom: 1px solid var(--border);
 }
 
 .health-card {
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: clamp(10px, 1.8vw, 15px);
 }
 
-.health-card:last-child {
-  text-align: right;
+.health-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 7px;
+  font-size: clamp(10px, 2.3vw, 14px);
+  font-weight: 800;
+}
+
+.blue-health-card .health-heading {
+  color: #8ed0ff;
+}
+
+.red-health-card .health-heading {
+  color: #ffaaa5;
+}
+
+.health-heading span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.health-heading strong {
+  color: white;
+  white-space: nowrap;
 }
 
 .health-track {
-  width: 100%;
-  height: 12px;
+  height: 10px;
   overflow: hidden;
-  border-radius: 6px;
-  background: #51454b;
+  border-radius: 99px;
+  background: #0d0f16;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .health-fill {
   width: 100%;
   height: 100%;
-  transition: width 0.2s;
+  border-radius: inherit;
+  transition: width 0.25s ease, background 0.25s ease;
 }
 
 .blue-health {
-  background: #32a1ff;
+  background: #36d982;
 }
 
 .red-health {
-  background: #ff554c;
+  background: #36d982;
 }
 
-#turn-indicator {
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: #e9822d;
-  color: white;
-  font-size: clamp(10px, 1.7vw, 15px);
-  font-weight: 900;
+.turn-banner {
+  min-width: 86px;
+  max-width: 140px;
+  padding: 8px 10px;
   text-align: center;
+  border-radius: 10px;
+  background: rgba(255, 157, 54, 0.13);
+  border: 1px solid rgba(255, 157, 54, 0.5);
 }
+
+.turn-banner span {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--orange);
+  font-size: 9px;
+  letter-spacing: 2px;
+  font-weight: 900;
+}
+
+.turn-banner strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(9px, 2vw, 12px);
+}
+
+.pause-btn {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  width: 35px;
+  height: 35px;
+  transform: translateY(-50%);
+  border-radius: 9px;
+  background: #3a3e4e;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+/* =========================================
+   DESERT BATTLEFIELD
+   ========================================= */
 
 #battlefield {
   position: relative;
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  overflow: hidden;
   isolation: isolate;
-  background: linear-gradient(#e98470 0%, #f9b36d 55%, #6f4350 100%);
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    #592e4b 0%,
+    #b95757 32%,
+    #f49a58 58%,
+    #f9c16c 78%,
+    #b85d3e 100%
+  );
+  touch-action: pan-y;
+}
+
+.battle-sky {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(
+      ellipse at 50% 65%,
+      rgba(255, 206, 120, 0.4),
+      transparent 45%
+    );
 }
 
 .sunset-sun {
   position: absolute;
-  top: 8%;
-  left: 50%;
-  width: clamp(45px, 9vw, 100px);
+  top: 12%;
+  left: 70%;
+  width: clamp(45px, 9vw, 105px);
   aspect-ratio: 1;
-  transform: translateX(-50%);
   border-radius: 50%;
-  background: #ffe4a0;
-  box-shadow: 0 0 45px #ffd18c80;
+  background: #ffe3a0;
+  box-shadow: 0 0 45px rgba(255, 217, 133, 0.45);
 }
 
 .mountain-range {
   position: absolute;
+  z-index: 0;
   left: -10%;
   right: -10%;
-  bottom: 18%;
+  bottom: 24%;
   height: 48%;
-  background: #79505c;
+  background: #65384c;
   clip-path: polygon(
-    0 75%, 12% 32%, 25% 66%, 42% 15%,
-    55% 62%, 72% 25%, 87% 60%, 100% 35%,
-    100% 100%, 0 100%
+    0 85%, 10% 42%, 20% 70%, 35% 15%,
+    46% 64%, 60% 25%, 73% 70%, 85% 30%,
+    100% 72%, 100% 100%, 0 100%
   );
 }
 
 .battle-cloud {
   position: absolute;
-  width: 100px;
+  width: 85px;
   height: 20px;
   border-radius: 50%;
-  background: #ffe1bd60;
+  background: rgba(255, 221, 191, 0.2);
+  filter: blur(1px);
 }
 
 .cloud-one {
-  top: 23%;
+  top: 18%;
   left: 12%;
 }
 
 .cloud-two {
-  top: 34%;
-  right: 10%;
+  top: 29%;
+  right: 18%;
   transform: scale(1.3);
 }
 
@@ -882,192 +639,688 @@ button:focus-visible {
   position: absolute;
   z-index: 1;
   bottom: -8%;
-  width: 70%;
+  width: 75%;
   height: 40%;
-  background: #b86d42;
   border-radius: 50% 50% 0 0;
 }
 
 .hill-one {
   left: -20%;
+  background: linear-gradient(180deg, #a85a40, #603344);
   transform: rotate(-5deg);
 }
 
 .hill-two {
-  right: -20%;
-  background: #98533b;
+  right: -25%;
+  bottom: -12%;
+  background: linear-gradient(180deg, #d77b48, #77403b);
   transform: rotate(5deg);
 }
 
+/* =========================================
+   TANKS
+   ========================================= */
+
 .battle-tank {
   position: absolute;
-  z-index: 3;
-  bottom: 14%;
-  width: clamp(65px, 11vw, 115px);
-  height: clamp(40px, 7vw, 70px);
-  transition: left 0.08s linear, right 0.08s linear;
+  z-index: 4;
+  bottom: 15%;
+  width: clamp(64px, 12vw, 112px);
+  height: clamp(40px, 7vw, 65px);
+  touch-action: none;
+  will-change: left, transform;
 }
 
 .tank-blue {
-  left: 12%;
+  left: 10%;
   --tank-color: #238ee8;
   --tank-dark: #15548b;
+  --tank-light: #72c7ff;
 }
 
 .tank-red {
-  right: 12%;
+  left: 78%;
   --tank-color: #ed4942;
   --tank-dark: #862c32;
+  --tank-light: #ff9b85;
 }
 
 .tank-hull {
   position: absolute;
-  bottom: 14%;
   left: 5%;
+  bottom: 23%;
   width: 90%;
-  height: 42%;
-  border-radius: 8px 12px 6px 6px;
-  background: var(--tank-color);
-  border: 2px solid var(--tank-dark);
+  height: 39%;
+  border: 2px solid rgba(0, 0, 0, 0.28);
+  border-radius: 8px 12px 5px 5px;
+  background: linear-gradient(
+    180deg,
+    var(--tank-light),
+    var(--tank-color) 40%,
+    var(--tank-dark)
+  );
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.18);
+}
+
+.tank-hull::before {
+  content: "";
+  position: absolute;
+  left: 16%;
+  top: 16%;
+  width: 17%;
+  height: 30%;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.23);
 }
 
 .tank-turret {
   position: absolute;
-  bottom: 50%;
-  left: 30%;
-  width: 40%;
-  height: 28%;
-  border-radius: 9px 9px 3px 3px;
-  background: var(--tank-color);
-  border: 2px solid var(--tank-dark);
+  z-index: 2;
+  left: 34%;
+  bottom: 53%;
+  width: 38%;
+  height: 27%;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  border-radius: 7px 9px 4px 4px;
+  background: linear-gradient(
+    180deg,
+    var(--tank-light),
+    var(--tank-color)
+  );
+  transform-origin: 50% 75%;
+  transform: rotate(0deg);
 }
 
 .tank-barrel {
   position: absolute;
-  z-index: 1;
-  bottom: 59%;
-  left: 55%;
-  width: 43%;
-  height: 8%;
-  border-radius: 3px;
-  background: #333039;
-  transform-origin: left center;
+  z-index: -1;
+  left: 72%;
+  top: 35%;
+  width: 100%;
+  height: 35%;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-radius: 2px;
+  background: linear-gradient(
+    180deg,
+    var(--tank-light),
+    var(--tank-dark)
+  );
+  transform-origin: 5% 50%;
 }
 
 .tank-tracks {
   position: absolute;
-  bottom: 3%;
-  left: 2%;
-  width: 96%;
-  height: 24%;
-  border-radius: 9px;
-  background: #343039;
-  border: 2px solid #17151b;
-}
-
-.battle-controls {
-  z-index: 5;
+  left: 0;
+  bottom: 5%;
+  width: 100%;
+  height: 28%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: space-evenly;
+  gap: 2px;
+  padding: 2px 4px;
+  border: 2px solid #282631;
+  border-radius: 8px;
+  background: #30303a;
+}
+
+.tank-tracks i {
+  width: 12%;
+  height: 65%;
+  border-radius: 50%;
+  background: #777580;
+  border: 1px solid #1c1c25;
+}
+
+/* =========================================
+   PROJECTILES AND EXPLOSIONS
+   ========================================= */
+
+#projectile-layer,
+#explosion-layer {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.projectile {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff3bd;
+  border: 2px solid #ffad44;
+  box-shadow: 0 0 12px 4px rgba(255, 162, 53, 0.5);
+  transform: translate(-50%, -50%);
+}
+
+.projectile-smoke {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(65, 55, 60, 0.6);
+  pointer-events: none;
+  animation: smoke-fade 0.65s ease-out forwards;
+}
+
+@keyframes smoke-fade {
+  from {
+    opacity: 0.7;
+    transform: scale(0.5);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(2.5);
+  }
+}
+
+.explosion {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    #fffbd4 0%,
+    #ffd35c 18%,
+    #ff7b27 42%,
+    rgba(220, 47, 27, 0.5) 65%,
+    transparent 75%
+  );
+  animation: explosion-pop 0.45s ease-out forwards;
+}
+
+@keyframes explosion-pop {
+  0% {
+    opacity: 1;
+    scale: 0.2;
+  }
+
+  65% {
+    opacity: 1;
+    scale: 1.15;
+  }
+
+  100% {
+    opacity: 0;
+    scale: 1.5;
+  }
+}
+
+/* =========================================
+   AIMING INTERFACE
+   ========================================= */
+
+.aim-indicator {
+  position: absolute;
+  z-index: 9;
+  left: 50%;
+  top: 12%;
+  display: flex;
+  gap: 8px;
   padding: 8px 12px;
-  background: #21151b;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  background: rgba(25, 24, 33, 0.78);
+  font-size: 12px;
+  font-weight: 900;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.battle-message {
+  position: absolute;
+  z-index: 7;
+  top: 8px;
+  left: 50%;
+  max-width: 90%;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: rgba(25, 24, 33, 0.58);
+  color: white;
+  font-size: clamp(10px, 2.5vw, 13px);
+  font-weight: 900;
+  text-align: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* =========================================
+   BATTLE CONTROLS
+   ========================================= */
+
+.battle-controls {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(125px, 0.85fr) minmax(0, 1.5fr);
+  gap: 12px;
+  padding: 12px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, #252938, #171923);
+  border-top: 1px solid var(--border);
 }
 
 .movement-controls {
-  display: flex;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
 }
 
-.movement-controls button,
-.battle-controls > button {
-  min-width: 48px;
-  min-height: 42px;
-  padding: 8px 12px;
-  border-radius: 9px;
-  background: #e9822d;
-  color: white;
-  font-size: 18px;
-  font-weight: 900;
+.control-btn {
+  min-width: 0;
+  min-height: 58px;
+  border-radius: 13px;
+  background: #3b4255;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 24px;
+  font-weight: 1000;
+  touch-action: none;
+}
+
+.control-btn:active {
+  background: #59627b;
 }
 
 .movement-status {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  text-align: center;
-  font-size: 12px;
+  gap: 5px;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.movement-status span {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.movement-status strong {
+  font-size: 14px;
+}
+
+.combat-controls {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.aim-power-info {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
   font-weight: 800;
 }
 
-#battle-message {
-  position: absolute;
-  z-index: 6;
-  top: 25%;
-  left: 50%;
-  transform: translateX(-50%);
+.aim-power-info span {
+  color: var(--muted);
+}
+
+.aim-power-info strong {
   color: white;
-  font-weight: 800;
-  text-align: center;
-  pointer-events: none;
 }
 
-.victory-overlay {
+.combat-controls label {
+  font-size: 10px;
+}
+
+#power-slider,
+#music-volume,
+#effects-volume {
+  width: 100%;
+  min-height: 22px;
+  accent-color: var(--orange);
+  cursor: pointer;
+  touch-action: pan-x;
+}
+
+.combat-buttons {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 8px;
+}
+
+.combat-buttons .secondary-btn,
+.combat-buttons .fire-btn {
+  min-width: 0;
+  min-height: 43px;
+  padding: 8px 6px;
+  font-size: clamp(10px, 2.5vw, 13px);
+}
+
+.fire-btn {
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ff6d36, #d92c29);
+  color: white;
+  font-weight: 1000;
+  box-shadow: 0 4px 0 #84221e;
+}
+
+#shell-info {
+  margin: 0;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+/* =========================================
+   OVERLAYS AND DIALOGS
+   ========================================= */
+
+.overlay[hidden],
+.aim-indicator[hidden] {
+  display: none !important;
+}
+
+.overlay {
   position: absolute;
-  z-index: 20;
+  z-index: 30;
   inset: 0;
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 20px;
-  background: #130e18d9;
+  align-items: center;
+  padding: 18px;
+  background: rgba(9, 10, 16, 0.78);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
-.victory-overlay[hidden] {
-  display: none;
-}
-
-.victory-card {
-  width: min(90%, 380px);
-  padding: 24px;
-  border-radius: 18px;
-  background: #2b1c25;
+.dialog-card {
+  width: min(380px, 100%);
+  max-height: 90%;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 13px;
+  padding: 25px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #303447, #1f222e);
   text-align: center;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.45);
+}
+
+.dialog-card h1,
+.dialog-card h2,
+.dialog-card p {
+  margin: 0;
+}
+
+.dialog-card p {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.victory-icon {
+  font-size: 55px;
 }
 
 .victory-card h1 {
-  margin-bottom: 14px;
-  color: #ffb64f;
+  color: var(--orange);
+  font-size: 32px;
 }
 
-.victory-card p {
-  margin-bottom: 18px;
+.victory-card #victory-message {
+  color: white;
+  font-size: 18px;
+  font-weight: 800;
 }
 
-.victory-card button {
-  width: 100%;
-  margin-top: 10px;
+/* =========================================
+   SETTINGS AND INSTRUCTIONS
+   ========================================= */
+
+.settings-card,
+.instructions-card {
+  width: min(550px, 92%);
+  margin: auto 0;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--panel);
 }
 
-@media (orientation: portrait) {
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.instructions-card {
+  max-height: 75%;
+  overflow: auto;
+}
+
+.instructions-card h2 {
+  margin: 15px 0 7px;
+  color: var(--orange);
+  font-size: 16px;
+}
+
+.instructions-card h2:first-child {
+  margin-top: 0;
+}
+
+.instructions-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.online-card {
+  margin: auto;
+}
+
+/* =========================================
+   SMALL SCREENS
+   ========================================= */
+
+@media (max-width: 600px) {
+  #main-menu {
+    padding: 15px;
+    background-position: 58% center;
+  }
+
+  .menu-panel {
+    width: min(300px, 88%);
+    padding: 20px;
+    gap: 12px;
+  }
+
+  .game-logo {
+    margin-bottom: 10px;
+  }
+
+  .mode-options {
+    gap: 10px;
+  }
+
+  .mode-card {
+    min-height: 155px;
+    padding: 16px 8px;
+  }
+
+  .setup-container {
+    gap: 7px;
+  }
+
+  .player-setup {
+    padding: 11px;
+    gap: 9px;
+  }
+
   .battle-hud {
-    gap: 5px;
-    padding: 6px;
+    min-height: 62px;
+    gap: 6px;
+    padding: 8px 45px 8px 8px;
   }
 
-  #turn-indicator {
-    padding: 6px;
-    max-width: 100px;
-  }
-
-  .battle-tank {
-    width: clamp(65px, 19vw, 100px);
-    height: clamp(40px, 13vw, 65px);
+  .turn-banner {
+    min-width: 70px;
+    padding: 7px 5px;
   }
 
   .battle-controls {
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 8px;
+    padding: 9px;
+    padding-bottom: max(9px, env(safe-area-inset-bottom));
+  }
+
+  .control-btn {
+    min-height: 51px;
+  }
+
+  .movement-status span {
+    font-size: 8px;
+  }
+
+  .movement-status strong {
+    font-size: 12px;
+  }
+
+  .dialog-card {
+    padding: 20px;
   }
 }
+
+/* =========================================
+   LANDSCAPE PHONES
+   ========================================= */
+
+@media (orientation: landscape) and (max-height: 600px) {
+  .battle-hud {
+    min-height: 50px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
+  .health-heading {
+    margin-bottom: 4px;
+  }
+
+  .health-track {
+    height: 7px;
+  }
+
+  .battle-controls {
+    grid-template-columns: minmax(140px, 0.8fr) minmax(0, 1.5fr);
+    padding: 6px 10px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+    gap: 12px;
+  }
+
+  .control-btn {
+    min-height: 42px;
+  }
+
+  .combat-controls {
+    gap: 4px;
+  }
+
+  .combat-buttons .secondary-btn,
+  .combat-buttons .fire-btn {
+    min-height: 34px;
+  }
+
+  #power-slider {
+    min-height: 16px;
+  }
+
+  #shell-info {
+    font-size: 9px;
+  }
+
+  .battle-tank {
+    bottom: 12%;
+  }
+
+  .battle-message {
+    top: 5px;
+  }
+
+  .aim-indicator {
+    top: 18%;
+  }
+
+  #mode-screen,
+  #local-setup-screen,
+  #settings-screen,
+  #how-to-screen {
+    overflow-y: auto;
+  }
+}
+
+/* =========================================
+   VERY NARROW PORTRAIT SCREENS
+   ========================================= */
+
+@media (orientation: portrait) and (max-width: 420px) {
+  .battle-hud {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 4px;
+  }
+
+  .health-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    font-size: 10px;
+  }
+
+  .turn-banner {
+    min-width: 60px;
+  }
+
+  .battle-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .movement-controls {
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .control-btn {
+    min-height: 44px;
+  }
+
+  .combat-controls {
+    gap: 5px;
+  }
+
+  .combat-buttons .secondary-btn,
+  .combat-buttons .fire-btn {
+    min-height: 38px;
+  }
+
+  .battle-tank {
+    width: 72px;
+    height: 45px;
+  }
+}
+
+/* =========================================
+   REDUCED MOTION ACCESSIBILITY
+   ========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+   }
