@@ -57,14 +57,7 @@ button {
 ================================= */
 
 #main-menu {
-  background:
-    linear-gradient(
-      180deg,
-      #542d4a 0%,
-      #b84c4b 28%,
-      #ff9149 55%,
-      #ffbd67 75%,
-      #9a4935 100%
+  background: url("assets/menu-bg.png") center center / cover no-repeat;
     );
 }
 
