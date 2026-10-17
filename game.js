@@ -1231,6 +1231,12 @@
   }
 
   function bindEvents() {
+    document.querySelectorAll("[data-back]").forEach(button => {
+  button.addEventListener("click", () => {
+    buttonSound();
+    showScreen(button.dataset.back);
+  });
+});
     $("play-btn")?.addEventListener("click", () => {
       buttonSound();
       showScreen(E.mode);
@@ -1258,7 +1264,10 @@
       showScreen(E.setup);
     });
 
-    $("begin-battle-btn")?.addEventListener("click", () => {
+    $("begin-battle-btn")?.addEventListener$("start-match-btn")?.addEventListener("click", () => {
+  buttonSound();
+  prepareMatch();
+});("click", () => {
       buttonSound();
       startMatch();
     });
