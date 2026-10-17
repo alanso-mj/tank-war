@@ -97,7 +97,6 @@
     dragging: false,
     pointerId: null,
     matchToken: 0,
-    // DEFAULT AUDIO SETTINGS ON & 50% VOLUME
     settings: { effects: true, music: true, volume: 50 },
     audio: null,
     musicAudio: null,
@@ -542,7 +541,6 @@
     maybeComputerTurn();
   }
 
-  // FIXED COMPUTER TURN LOGIC
   function maybeComputerTurn() {
     if (!G.running || G.paused || G.mode !== "computer" || G.active !== 1) return;
     G.busy = true;
@@ -647,6 +645,11 @@
     if (E.volumeText) E.volumeText.textContent = `${G.settings.volume}%`;
     
     updateAudioVolume();
+
+    // Automatically trigger background music on load if enabled
+    if (G.settings.music) {
+      startMusic();
+    }
   }
 
   function bindEvents() {
@@ -654,18 +657,11 @@
       button.addEventListener("click", () => { buttonSound(); showScreen(button.dataset.back); });
     });
 
-        $("play-btn")?.addEventListener("click", () => {
+    $("play-btn")?.addEventListener("click", () => {
       buttonSound();
       triggerFullscreen();
-      
-      // Force start music on first user click if enabled
-      if (G.settings.music) {
-        startMusic();
-      }
-
+      if (G.settings.music) startMusic();
       showScreen(E.mode);
-    });
-
     });
     $("online-btn")?.addEventListener("click", () => { buttonSound(); showScreen(E.online); });
     $("settings-btn")?.addEventListener("click", () => { buttonSound(); showScreen(E.settings); });
@@ -768,7 +764,6 @@
     loadSettings();
     bindEvents();
     updatePlayerVisuals();
-    if (G.settings.music) startMusic();
     if (E.power) E.power.value = String(G.power);
     updateHUD();
   }
