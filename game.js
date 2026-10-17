@@ -1267,6 +1267,9 @@
     $("begin-battle-btn")?.addEventListener$("start-match-btn")?.addEventListener("click", () => {
   buttonSound();
   prepareMatch();
+});$("start-match-btn")?.addEventListener("click", () => {
+  buttonSound();
+  prepareMatch();
 });("click", () => {
       buttonSound();
       startMatch();
