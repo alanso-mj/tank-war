@@ -654,10 +654,18 @@
       button.addEventListener("click", () => { buttonSound(); showScreen(button.dataset.back); });
     });
 
-    $("play-btn")?.addEventListener("click", () => {
+        $("play-btn")?.addEventListener("click", () => {
       buttonSound();
       triggerFullscreen();
+      
+      // Force start music on first user click if enabled
+      if (G.settings.music) {
+        startMusic();
+      }
+
       showScreen(E.mode);
+    });
+
     });
     $("online-btn")?.addEventListener("click", () => { buttonSound(); showScreen(E.online); });
     $("settings-btn")?.addEventListener("click", () => { buttonSound(); showScreen(E.settings); });
