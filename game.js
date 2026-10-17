@@ -97,7 +97,8 @@
     dragging: false,
     pointerId: null,
     matchToken: 0,
-    settings: { effects: true, music: false, volume: 45 },
+    // DEFAULT AUDIO SETTINGS ON & 50% VOLUME
+    settings: { effects: true, music: true, volume: 50 },
     audio: null,
     musicAudio: null,
     aiTimer: null
@@ -541,22 +542,26 @@
     maybeComputerTurn();
   }
 
+  // FIXED COMPUTER TURN LOGIC
   function maybeComputerTurn() {
     if (!G.running || G.paused || G.mode !== "computer" || G.active !== 1) return;
     G.busy = true;
     updateHUD();
+    
+    clearTimeout(G.aiTimer);
     G.aiTimer = setTimeout(() => {
-      if (!G.running || G.paused || G.active !== 1) {
+      if (!G.running || G.paused || G.mode !== "computer" || G.active !== 1) {
         G.busy = false;
         updateHUD();
         return;
       }
-      G.angle[1] = clamp(30 + Math.random() * 25, RULES.minAngle, RULES.maxAngle);
-      G.power = clamp(45 + Math.random() * 35, 30, 90);
+      G.angle[1] = clamp(25 + Math.random() * 35, RULES.minAngle, RULES.maxAngle);
+      G.power = clamp(40 + Math.random() * 40, 30, 95);
+      
       G.busy = false;
       updateHUD();
       fireShot();
-    }, 900);
+    }, 1000);
   }
 
   function finishMatch(winner) {
@@ -617,11 +622,11 @@
   }
 
   function resetSettings() {
-    G.settings = { effects: true, music: false, volume: 45 };
+    G.settings = { effects: true, music: true, volume: 50 };
     if (E.effects) E.effects.checked = true;
-    if (E.music) E.music.checked = false;
-    if (E.volume) E.volume.value = "45";
-    if (E.volumeText) E.volumeText.textContent = "45%";
+    if (E.music) E.music.checked = true;
+    if (E.volume) E.volume.value = "50";
+    if (E.volumeText) E.volumeText.textContent = "50%";
     stopMusic();
     updateAudioVolume();
     localStorage.removeItem(SETTINGS_KEY);
@@ -631,12 +636,16 @@
   function loadSettings() {
     try {
       const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
-      if (saved) G.settings = { ...G.settings, ...saved };
+      if (saved) {
+        G.settings = { ...G.settings, ...saved };
+      }
     } catch (_) {}
+
     if (E.effects) E.effects.checked = G.settings.effects;
     if (E.music) E.music.checked = G.settings.music;
     if (E.volume) E.volume.value = String(G.settings.volume);
     if (E.volumeText) E.volumeText.textContent = `${G.settings.volume}%`;
+    
     updateAudioVolume();
   }
 
@@ -647,7 +656,7 @@
 
     $("play-btn")?.addEventListener("click", () => {
       buttonSound();
-      triggerFullscreen(); // Hides Chrome URL bar
+      triggerFullscreen();
       showScreen(E.mode);
     });
     $("online-btn")?.addEventListener("click", () => { buttonSound(); showScreen(E.online); });
@@ -678,7 +687,6 @@
       drawAim();
     });
 
-    // FIELD TOUCH / AIM BUG FIX: Ignores touches on buttons and HUD elements
     E.field?.addEventListener("pointerdown", e => {
       if (!canControl()) return;
       if (e.target.closest("button") || e.target.closest(".ingame-controls") || e.target.closest(".ingame-hud") || e.target.closest(".overlay")) {
