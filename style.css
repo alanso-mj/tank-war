@@ -1,4 +1,23 @@
 /* =========================================
+   CORE SCREEN VISIBILITY FIX
+   ========================================= */
+
+.screen {
+  display: none !important;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.screen.active {
+  display: flex !important;
+  flex-direction: column;
+}
+
+.hidden {
+  display: none !important;
+}
+/* =========================================
    IMMERSIVE IN-GAME BATTLE OVERLAYS
    ========================================= */
 
