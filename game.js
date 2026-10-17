@@ -677,20 +677,20 @@
     /* =========================================
        TANK POSITIONING
        ========================================= */
+function positionTanks() {
+    if (!elements.battlefield.clientWidth) return;
 
-    function positionTanks() {
-        if (!elements.battlefield.clientWidth) return;
+    for (let player = 0; player < 2; player++) {
+        const tank = getTankElement(player);
 
-        const width = elements.battlefield.clientWidth;
+        const y = terrainYAt(game.x[player]);
 
-        for (let player = 0; player < 2; player++) {
-            const tank = getTankElement(player);
-
-            const y = terrainYAt(game.x[player]);
-
-            tank.style.left = `${game.x[player]}px`;
-            tank.style.top = `${y - 25}px`;
+        tank.style.left = `${game.x[player]}px`;
+        tank.style.top = `${y - 25}px`;
     }
+}
+    
+    
 
     /* =========================================
        HEALTH AND TURN DISPLAY
