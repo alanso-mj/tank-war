@@ -1,7 +1,39 @@
 /* =========================================
-   CORE SCREEN VISIBILITY FIX
+   TANK WAR - FIXED FULL STYLESHEET
    ========================================= */
 
+:root {
+  --bg: #0b1016;
+  --panel: #141d27;
+  --border: #304252;
+  --text: #f3f6fa;
+  --muted: #91a2b4;
+  --blue: #45b8ff;
+  --red: #ff5b62;
+  --yellow: #ffce68;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+#game-app {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 0%, #1c3041 0%, transparent 55%), var(--bg);
+}
+
+/* CORE SCREEN HIDING & SHOWING */
 .screen {
   display: none !important;
   width: 100%;
@@ -12,15 +44,52 @@
 .screen.active {
   display: flex !important;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-.hidden {
-  display: none !important;
-}
-/* =========================================
-   IMMERSIVE IN-GAME BATTLE OVERLAYS
-   ========================================= */
+.hidden { display: none !important; }
 
+/* MAIN MENU & PANELS */
+.menu-container, .panel, .vs-container, .result-container {
+  width: min(92%, 460px);
+  padding: 24px;
+  background: linear-gradient(145deg, #17232e, #101820);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.panel, .setup-panel { width: min(92%, 700px); text-align: left; }
+
+.game-brand h1 {
+  font-size: clamp(2.5rem, 10vw, 4rem);
+  font-weight: 1000;
+  font-style: italic;
+  color: #fff;
+}
+.game-brand h1 span { color: var(--blue); }
+
+.menu-buttons, .player-setup-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+button {
+  min-height: 46px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.primary-btn { background: linear-gradient(135deg, #43baff, #1976d2); color: #06131f; width: 100%; }
+.secondary-btn { background: #192531; border: 1px solid #344757; color: var(--text); width: 100%; }
+
+/* BATTLESCREEN OVERLAYS */
 .battle-screen {
   position: relative;
   width: 100vw;
@@ -39,155 +108,6 @@
   overflow: hidden;
 }
 
-/* Floating HUD elements */
-.ingame-hud {
-  position: absolute;
-  top: 14px;
-  z-index: 25;
-  background: rgba(11, 18, 26, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 8px 14px;
-  border-radius: 10px;
-  backdrop-filter: blur(6px);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.top-left { left: 14px; }
-.top-right { right: 14px; text-align: right; }
-.top-center { left: 50%; transform: translateX(-50%); padding: 6px 16px; }
-
-.hud-name { font-size: 0.72rem; font-weight: 900; letter-spacing: 1px; }
-.blue-text { color: var(--blue); }
-.red-text { color: var(--red); }
-
-.mini-hp { width: 90px; height: 6px; background: #223240; border-radius: 99px; overflow: hidden; }
-.hp-bar { height: 100%; transition: width 0.3s ease; }
-.blue-hp { background: linear-gradient(90deg, #29a5f4, #62d4ff); }
-.red-hp { background: linear-gradient(90deg, #ff777b, #ff414e); margin-left: auto; }
-
-.hp-num { font-size: 0.62rem; color: var(--muted); font-weight: 700; }
-.turn-pill { font-size: 0.7rem; font-weight: 900; color: var(--yellow); letter-spacing: 1.5px; text-transform: uppercase; }
-
-.hud-menu-btn {
-  position: absolute;
-  top: 14px;
-  right: 135px;
-  z-index: 25;
-  width: 38px;
-  height: 38px;
-  background: rgba(11, 18, 26, 0.85);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 10px;
-  color: #fff;
-  font-size: 1.1rem;
-  cursor: pointer;
-  backdrop-filter: blur(6px);
-}
-
-/* Floating Arcade Controls at Bottom */
-.ingame-controls {
-  position: absolute;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 25;
-  width: min(94%, 680px);
-  background: rgba(11, 18, 26, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 16px;
-  padding: 12px 18px;
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-}
-
-.ctrl-group { display: flex; align-items: center; gap: 8px; }
-
-.arcade-btn {
-  width: 42px;
-  height: 42px;
-  background: #192a38;
-  border: 1px solid #324c60;
-  border-radius: 10px;
-  color: var(--blue);
-  font-size: 0.95rem;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.arcade-btn:active { transform: scale(0.94); background: #243c50; }
-
-.moves-pill { font-size: 0.75rem; font-weight: 900; color: var(--text); min-width: 32px; text-align: center; }
-
-.power-group { flex: 1; flex-direction: column; align-items: flex-start; gap: 4px; padding: 0 8px; }
-.power-label { font-size: 0.58rem; font-weight: 800; color: var(--muted); letter-spacing: 1px; }
-
-#shot-power { width: 100%; accent-color: var(--blue); cursor: pointer; }
-
-.arcade-fire-btn {
-  background: linear-gradient(135deg, #ff9a42, #ed4937);
-  color: #1a0a05;
-  font-weight: 900;
-  font-size: 0.95rem;
-  letter-spacing: 1.5px;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  box-shadow: 0 6px 20px rgba(246,89,48,0.3);
-  transition: transform 0.1s ease;
-}
-
-.arcade-fire-btn:active { transform: scale(0.95); }
-
-.tank-badge {
-  position: absolute;
-  bottom: -18px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(10, 16, 22, 0.9);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.52rem;
-  font-weight: 900;
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.1);
-  white-space: nowrap;
-}
-
-@media (max-width: 650px) {
-  .ingame-controls { padding: 10px 12px; }
-  .arcade-fire-btn { padding: 10px 16px; font-size: 0.85rem; }
-  .arcade-btn { width: 36px; height: 36px; }
-  .hud-menu-btn { right: 110px; width: 34px; height: 34px; top: 12px; }
-  .top-left, .top-right, .top-center { top: 12px; padding: 6px 10px; }
-}
-/* =========================================
-   FIXING OVERLAYS & HUD POSITIONING
-   ========================================= */
-
-.battle-screen {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-}
-
-.battlefield {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-/* Position HUD to top corners and center */
 .ingame-hud {
   position: absolute;
   top: 12px;
@@ -205,7 +125,15 @@
 .top-right { right: 12px; text-align: right; }
 .top-center { left: 50%; transform: translateX(-50%); padding: 4px 12px; }
 
-/* Position Arcade Controls at the bottom center */
+.hud-name { font-size: 0.72rem; font-weight: 900; }
+.blue-text { color: var(--blue); }
+.red-text { color: var(--red); }
+
+.mini-hp { width: 80px; height: 6px; background: #223240; border-radius: 99px; overflow: hidden; }
+.hp-bar { height: 100%; }
+.blue-hp { background: var(--blue); }
+.red-hp { background: var(--red); margin-left: auto; }
+
 .ingame-controls {
   position: absolute;
   bottom: 16px;
@@ -223,49 +151,37 @@
   gap: 10px;
 }
 
-.ctrl-group { display: flex; align-items: center; gap: 6px; }
-
 .arcade-btn {
   width: 38px;
   height: 38px;
   background: #192a38;
   border: 1px solid #324c60;
   border-radius: 8px;
-  color: #45b8ff;
-  font-weight: bold;
-  cursor: pointer;
+  color: var(--blue);
 }
-
-.power-group { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 0 6px; }
-.power-label { font-size: 0.55rem; color: #91a2b4; font-weight: bold; }
-
-#shot-power { width: 100%; accent-color: #45b8ff; }
 
 .arcade-fire-btn {
   background: linear-gradient(135deg, #ff9a42, #ed4937);
   color: #1a0a05;
   font-weight: 900;
-  font-size: 0.9rem;
   padding: 10px 20px;
-  border: none;
   border-radius: 10px;
-  cursor: pointer;
 }
 
-.hud-menu-btn {
+#terrain-canvas, #aim-canvas {
   position: absolute;
-  top: 12px;
-  right: 120px;
-  z-index: 25;
-  width: 36px;
-  height: 36px;
-  background: rgba(11, 18, 26, 0.85);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 8px;
-  color: #fff;
-  cursor: pointer;
+  inset: 0;
+  pointer-events: none;
 }
 
+.battle-tank {
+  position: absolute;
+  z-index: 4;
+  width: 70px;
+  height: 50px;
+  transform: translate(-50%, -50%);
+}
+.battle-tank img { width: 100%; height: 100%; object-fit: contain; }
 .tank-badge {
   position: absolute;
   bottom: -16px;
@@ -277,5 +193,18 @@
   font-size: 0.5rem;
   font-weight: 900;
   color: #fff;
+  white-space: vocab;
   white-space: nowrap;
+}
+
+.rotate-screen {
+  position: fixed;
+  inset: 0;
+  background: #0a1118;
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 20px;
 }
