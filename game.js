@@ -1268,7 +1268,7 @@
   buttonSound();
   prepareMatch();
 });$("start-match-btn")?.addEventListener("click", () => {
-  buttonSound();
+  alert("START BUTTON WORKS");
   prepareMatch();
 });("click", () => {
       buttonSound();
