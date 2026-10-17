@@ -1,3 +1,4 @@
+alert("GAME.JS IS LOADED!");
 (() => {
   "use strict";
 
