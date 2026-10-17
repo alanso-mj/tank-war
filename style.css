@@ -1448,3 +1448,25 @@ img {
     transition-duration: 0.01ms !important;
   }
    }
+/* Tank War fixes */
+#main-menu {
+  background-image:
+    linear-gradient(rgba(5, 12, 25, 0.35), rgba(5, 12, 25, 0.65)),
+    url("menu-bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+#battlefield {
+  touch-action: none;
+}
+
+#load-match-btn {
+  width: 100%;
+}
+
+#battle-menu-overlay {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
