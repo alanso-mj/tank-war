@@ -746,13 +746,18 @@ alert("GAME.JS IS LOADED!");
       drawAim();
     });
 
-    E.field?.addEventListener("pointerdown", e => {
+        E.field?.addEventListener("pointerdown", e => {
       if (!canControl()) return;
+      // If the user tapped on a button, HUD, or control panel, DO NOT change aim
+      if (e.target.closest("button") || e.target.closest(".ingame-controls") || e.target.closest(".ingame-hud") || e.target.closest(".overlay")) {
+        return;
+      }
       const rect = E.field.getBoundingClientRect();
       G.dragging = true;
       G.pointerId = e.pointerId;
       setAngleFromPoint({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     });
+
 
     E.field?.addEventListener("pointermove", e => {
       if (!G.dragging || e.pointerId !== G.pointerId) return;
