@@ -149,3 +149,114 @@
   .hud-menu-btn { right: 110px; width: 34px; height: 34px; top: 12px; }
   .top-left, .top-right, .top-center { top: 12px; padding: 6px 10px; }
 }
+/* =========================================
+   FIXING OVERLAYS & HUD POSITIONING
+   ========================================= */
+
+.battle-screen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.battlefield {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Position HUD to top corners and center */
+.ingame-hud {
+  position: absolute;
+  top: 12px;
+  z-index: 25;
+  background: rgba(11, 18, 26, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.top-left { left: 12px; }
+.top-right { right: 12px; text-align: right; }
+.top-center { left: 50%; transform: translateX(-50%); padding: 4px 12px; }
+
+/* Position Arcade Controls at the bottom center */
+.ingame-controls {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  width: min(95%, 650px);
+  background: rgba(11, 18, 26, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ctrl-group { display: flex; align-items: center; gap: 6px; }
+
+.arcade-btn {
+  width: 38px;
+  height: 38px;
+  background: #192a38;
+  border: 1px solid #324c60;
+  border-radius: 8px;
+  color: #45b8ff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.power-group { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 0 6px; }
+.power-label { font-size: 0.55rem; color: #91a2b4; font-weight: bold; }
+
+#shot-power { width: 100%; accent-color: #45b8ff; }
+
+.arcade-fire-btn {
+  background: linear-gradient(135deg, #ff9a42, #ed4937);
+  color: #1a0a05;
+  font-weight: 900;
+  font-size: 0.9rem;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.hud-menu-btn {
+  position: absolute;
+  top: 12px;
+  right: 120px;
+  z-index: 25;
+  width: 36px;
+  height: 36px;
+  background: rgba(11, 18, 26, 0.85);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.tank-badge {
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 16, 22, 0.9);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.5rem;
+  font-weight: 900;
+  color: #fff;
+  white-space: nowrap;
+}
