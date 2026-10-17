@@ -34,15 +34,15 @@
         </div>
 
         <div class="menu-buttons">
-          <button id="play-btn" class="primary-btn">
+          <button id="play-btn" class="primary-btn" onclick="goToMode()">
             <span>▶</span> PLAY GAME
           </button>
 
-          <button id="online-btn" class="secondary-btn">
+          <button id="online-btn" class="secondary-btn" onclick="goToOnline()">
             <span>◎</span> ONLINE MODE
           </button>
 
-          <button id="settings-btn" class="secondary-btn">
+          <button id="settings-btn" class="secondary-btn" onclick="goToSettings()">
             <span>⚙</span> SETTINGS
           </button>
         </div>
@@ -54,20 +54,20 @@
     <!-- GAME MODE -->
     <section id="mode-screen" class="screen">
       <div class="panel mode-panel">
-        <button class="back-btn" data-back="main-menu">← BACK</button>
+        <button class="back-btn" onclick="goMenu()">← BACK</button>
 
         <p class="section-label">GAME CONFIGURATION</p>
         <h2>SELECT MODE</h2>
         <p class="panel-description">Choose how you want to battle.</p>
 
         <div class="mode-options">
-          <button id="local-mode-btn" class="mode-card">
+          <button id="local-mode-btn" class="mode-card" onclick="selectMode('local')">
             <span class="mode-icon">⚔</span>
             <strong>LOCAL BATTLE</strong>
             <span>Two players on one device</span>
           </button>
 
-          <button id="computer-mode-btn" class="mode-card">
+          <button id="computer-mode-btn" class="mode-card" onclick="selectMode('computer')">
             <span class="mode-icon">🤖</span>
             <strong>VS COMPUTER</strong>
             <span>Battle against the computer</span>
@@ -79,7 +79,7 @@
     <!-- PLAYER SETUP -->
     <section id="setup-screen" class="screen">
       <div class="panel setup-panel">
-        <button class="back-btn" data-back="mode-screen">← BACK</button>
+        <button class="back-btn" onclick="goToMode()">← BACK</button>
 
         <p class="section-label">PREPARE FOR COMBAT</p>
         <h2>PLAYER SETUP</h2>
@@ -107,7 +107,7 @@
             >
 
             <label for="player1-tank">SELECT TANK</label>
-            <select id="player1-tank">
+            <select id="player1-tank" onchange="updatePreviews()">
               <option value="tank1">Tank 1</option>
               <option value="tank2">Tank 2</option>
               <option value="tank3">Tank 3</option>
@@ -117,7 +117,7 @@
             <div class="tank-preview">
               <img
                 id="player1-preview"
-                src="tank1.png"
+                src="tank-blue.png"
                 alt="Player 1 tank preview"
               >
             </div>
@@ -144,7 +144,7 @@
             >
 
             <label for="player2-tank">SELECT TANK</label>
-            <select id="player2-tank">
+            <select id="player2-tank" onchange="updatePreviews()">
               <option value="tank1">Tank 1</option>
               <option value="tank2" selected>Tank 2</option>
               <option value="tank3">Tank 3</option>
@@ -154,7 +154,7 @@
             <div class="tank-preview">
               <img
                 id="player2-preview"
-                src="tank2.png"
+                src="tank-red.png"
                 alt="Player 2 tank preview"
               >
             </div>
@@ -162,7 +162,7 @@
 
         </div>
 
-        <button id="start-match-btn" class="primary-btn start-btn">
+        <button id="start-match-btn" class="primary-btn start-btn" onclick="prepareMatch()">
           START BATTLE →
         </button>
       </div>
@@ -171,7 +171,7 @@
     <!-- ONLINE MODE -->
     <section id="online-screen" class="screen">
       <div class="panel online-panel">
-        <button class="back-btn" data-back="main-menu">← BACK</button>
+        <button class="back-btn" onclick="goMenu()">← BACK</button>
 
         <p class="section-label">MULTIPLAYER</p>
         <h2>ONLINE BATTLE</h2>
@@ -183,7 +183,7 @@
           Online multiplayer requires a server connection.
         </p>
 
-        <button class="secondary-btn" data-back="main-menu">
+        <button class="secondary-btn" onclick="goMenu()">
           RETURN TO MENU
         </button>
       </div>
@@ -197,7 +197,7 @@
 
         <div class="versus-layout">
           <div class="versus-player">
-            <img id="vs-tank1-image" src="tank1.png" alt="Player 1 tank">
+            <img id="vs-tank1-image" src="tank-blue.png" alt="Player 1 tank">
             <h3 id="vs-player1-name">PLAYER 1</h3>
             <p>BLUE TEAM</p>
           </div>
@@ -205,13 +205,13 @@
           <div class="versus-text">VS</div>
 
           <div class="versus-player">
-            <img id="vs-tank2-image" src="tank2.png" alt="Player 2 tank">
+            <img id="vs-tank2-image" src="tank-red.png" alt="Player 2 tank">
             <h3 id="vs-player2-name">PLAYER 2</h3>
             <p>RED TEAM</p>
           </div>
         </div>
 
-        <button id="begin-battle-btn" class="primary-btn">
+        <button id="begin-battle-btn" class="primary-btn" onclick="startBattleMatch()">
           ENTER BATTLEFIELD →
         </button>
       </div>
@@ -256,6 +256,7 @@
         <button
           id="battle-menu-btn"
           class="battle-menu-btn"
+          onclick="togglePause()"
           aria-label="Open battle menu"
           title="Battle menu"
         >
@@ -270,14 +271,14 @@
         <canvas id="aim-canvas"></canvas>
 
         <div id="tank1" class="battle-tank">
-          <img id="tank1-image" src="tank1.png" alt="Player 1 tank">
+          <img id="tank1-image" src="tank-blue.png" alt="Player 1 tank">
           <div class="tank-nameplate">
             <span id="tank1-nameplate">PLAYER 1</span>
           </div>
         </div>
 
         <div id="tank2" class="battle-tank">
-          <img id="tank2-image" src="tank2.png" alt="Player 2 tank">
+          <img id="tank2-image" src="tank-red.png" alt="Player 2 tank">
           <div class="tank-nameplate">
             <span id="tank2-nameplate">PLAYER 2</span>
           </div>
@@ -298,6 +299,7 @@
             <button
               id="move-left-btn"
               class="control-btn"
+              onclick="moveTankAction(-1)"
               aria-label="Move tank left"
               title="Move left"
             >◀</button>
@@ -307,6 +309,7 @@
             <button
               id="move-right-btn"
               class="control-btn"
+              onclick="moveTankAction(1)"
               aria-label="Move tank right"
               title="Move right"
             >▶</button>
@@ -326,6 +329,7 @@
             max="100"
             value="60"
             step="1"
+            oninput="updatePower(this.value)"
             aria-label="Shot power"
           >
 
@@ -335,7 +339,7 @@
           </div>
         </div>
 
-        <button id="fire-btn" class="fire-btn">
+        <button id="fire-btn" class="fire-btn" onclick="fireShotAction()">
           <span>✦</span>
           <strong>FIRE!</strong>
         </button>
@@ -348,19 +352,23 @@
           <p class="section-label">BATTLE PAUSED</p>
           <h2>GAME MENU</h2>
 
-          <button id="continue-btn" class="primary-btn">
+          <button id="continue-btn" class="primary-btn" onclick="togglePause()">
             CONTINUE BATTLE
           </button>
 
-          <button id="save-match-btn" class="secondary-btn">
+          <button id="save-match-btn" class="secondary-btn" onclick="saveMatchAction()">
             SAVE MATCH
           </button>
 
-          <button id="restart-match-btn" class="secondary-btn">
+          <button id="load-match-btn" class="secondary-btn" onclick="loadMatchAction()">
+            LOAD SAVED MATCH
+          </button>
+
+          <button id="restart-match-btn" class="secondary-btn" onclick="startBattleMatch()">
             RESTART MATCH
           </button>
 
-          <button id="return-menu-btn" class="danger-btn">
+          <button id="return-menu-btn" class="danger-btn" onclick="goMenu()">
             QUIT TO MAIN MENU
           </button>
         </div>
@@ -378,7 +386,7 @@
         <div class="result-tank">
           <img
             id="result-tank-image"
-            src="tank1.png"
+            src="tank-blue.png"
             alt="Winning tank"
           >
         </div>
@@ -399,11 +407,11 @@
         </div>
 
         <div class="result-buttons">
-          <button id="rematch-btn" class="primary-btn">
+          <button id="rematch-btn" class="primary-btn" onclick="startBattleMatch()">
             ↻ REMATCH
           </button>
 
-          <button id="result-menu-btn" class="secondary-btn">
+          <button id="result-menu-btn" class="secondary-btn" onclick="goMenu()">
             MAIN MENU
           </button>
         </div>
@@ -413,7 +421,7 @@
     <!-- SETTINGS -->
     <section id="settings-screen" class="screen">
       <div class="panel settings-panel">
-        <button class="back-btn" data-back="main-menu">← BACK</button>
+        <button class="back-btn" onclick="goMenu()">← BACK</button>
 
         <p class="section-label">CUSTOMIZE YOUR EXPERIENCE</p>
         <h2>SETTINGS</h2>
@@ -427,7 +435,7 @@
             </div>
 
             <label class="switch">
-              <input id="effects-toggle" type="checkbox" checked>
+              <input id="effects-toggle" type="checkbox" checked onchange="toggleEffects(this)">
               <span class="switch-slider"></span>
             </label>
           </div>
@@ -439,7 +447,7 @@
             </div>
 
             <label class="switch">
-              <input id="music-toggle" type="checkbox">
+              <input id="music-toggle" type="checkbox" onchange="toggleMusicSetting(this)">
               <span class="switch-slider"></span>
             </label>
           </div>
@@ -457,6 +465,7 @@
                 min="0"
                 max="100"
                 value="70"
+                oninput="updateVolume(this.value)"
                 aria-label="Game volume"
               >
               <strong id="volume-value">70%</strong>
@@ -465,7 +474,7 @@
 
         </div>
 
-        <button id="reset-settings-btn" class="secondary-btn">
+        <button id="reset-settings-btn" class="secondary-btn" onclick="resetSettingsAction()">
           RESET SETTINGS
         </button>
       </div>
@@ -475,4 +484,4 @@
 
   <script src="game.js"></script>
 </body>
-    </html>
+</html>
