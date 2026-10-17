@@ -28,25 +28,14 @@
           <span class="brand-icon">⚔</span>
           <p class="brand-subtitle">TACTICAL COMBAT</p>
           <h1>TANK <span>WAR</span></h1>
-          <p class="brand-description">
-            AIM. FIRE. DOMINATE.
-          </p>
+          <p class="brand-description">AIM. FIRE. DOMINATE.</p>
         </div>
 
         <div class="menu-buttons">
-          <button id="play-btn" class="primary-btn" onclick="goToMode()">
-            <span>▶</span> PLAY GAME
-          </button>
-
-          <button id="online-btn" class="secondary-btn" onclick="goToOnline()">
-            <span>◎</span> ONLINE MODE
-          </button>
-
-          <button id="settings-btn" class="secondary-btn" onclick="goToSettings()">
-            <span>⚙</span> SETTINGS
-          </button>
+          <button id="play-btn" class="primary-btn" onclick="goToMode()"><span>▶</span> PLAY GAME</button>
+          <button id="online-btn" class="secondary-btn" onclick="goToOnline()"><span>◎</span> ONLINE MODE</button>
+          <button id="settings-btn" class="secondary-btn" onclick="goToSettings()"><span>⚙</span> SETTINGS</button>
         </div>
-
         <p class="menu-footer">CHOOSE YOUR TANK. OWN THE BATTLEFIELD.</p>
       </div>
     </section>
@@ -55,18 +44,15 @@
     <section id="mode-screen" class="screen">
       <div class="panel mode-panel">
         <button class="back-btn" onclick="goMenu()">← BACK</button>
-
         <p class="section-label">GAME CONFIGURATION</p>
         <h2>SELECT MODE</h2>
         <p class="panel-description">Choose how you want to battle.</p>
-
         <div class="mode-options">
           <button id="local-mode-btn" class="mode-card" onclick="selectMode('local')">
             <span class="mode-icon">⚔</span>
             <strong>LOCAL BATTLE</strong>
             <span>Two players on one device</span>
           </button>
-
           <button id="computer-mode-btn" class="mode-card" onclick="selectMode('computer')">
             <span class="mode-icon">🤖</span>
             <strong>VS COMPUTER</strong>
@@ -80,13 +66,9 @@
     <section id="setup-screen" class="screen">
       <div class="panel setup-panel">
         <button class="back-btn" onclick="goToMode()">← BACK</button>
-
         <p class="section-label">PREPARE FOR COMBAT</p>
         <h2>PLAYER SETUP</h2>
-
         <div class="player-setup-grid">
-
-          <!-- PLAYER 1 -->
           <div class="player-setup-card player-one">
             <div class="player-heading">
               <span class="player-number">01</span>
@@ -95,35 +77,16 @@
                 <h3>BLUE TEAM</h3>
               </div>
             </div>
-
             <label for="player1-name">PLAYER NAME</label>
-            <input
-              id="player1-name"
-              type="text"
-              maxlength="18"
-              placeholder="Enter player 1 name"
-              value="Player 1"
-              autocomplete="off"
-            >
-
+            <input id="player1-name" type="text" maxlength="18" value="Player 1" autocomplete="off">
             <label for="player1-tank">SELECT TANK</label>
             <select id="player1-tank" onchange="updatePreviews()">
               <option value="tank1">Tank 1</option>
               <option value="tank2">Tank 2</option>
-              <option value="tank3">Tank 3</option>
-              <option value="tank4">Tank 4</option>
             </select>
-
-            <div class="tank-preview">
-              <img
-                id="player1-preview"
-                src="tank-blue.png"
-                alt="Player 1 tank preview"
-              >
-            </div>
+            <div class="tank-preview"><img id="player1-preview" src="tank-blue.png" alt="Tank 1"></div>
           </div>
 
-          <!-- PLAYER 2 -->
           <div class="player-setup-card player-two">
             <div class="player-heading">
               <span class="player-number">02</span>
@@ -132,39 +95,17 @@
                 <h3>RED TEAM</h3>
               </div>
             </div>
-
             <label for="player2-name">PLAYER NAME</label>
-            <input
-              id="player2-name"
-              type="text"
-              maxlength="18"
-              placeholder="Enter player 2 name"
-              value="Player 2"
-              autocomplete="off"
-            >
-
+            <input id="player2-name" type="text" maxlength="18" value="Player 2" autocomplete="off">
             <label for="player2-tank">SELECT TANK</label>
             <select id="player2-tank" onchange="updatePreviews()">
               <option value="tank1">Tank 1</option>
               <option value="tank2" selected>Tank 2</option>
-              <option value="tank3">Tank 3</option>
-              <option value="tank4">Tank 4</option>
             </select>
-
-            <div class="tank-preview">
-              <img
-                id="player2-preview"
-                src="tank-red.png"
-                alt="Player 2 tank preview"
-              >
-            </div>
+            <div class="tank-preview"><img id="player2-preview" src="tank-red.png" alt="Tank 2"></div>
           </div>
-
         </div>
-
-        <button id="start-match-btn" class="primary-btn start-btn" onclick="prepareMatch()">
-          START BATTLE →
-        </button>
+        <button id="start-match-btn" class="primary-btn start-btn" onclick="prepareMatch()">START BATTLE →</button>
       </div>
     </section>
 
@@ -172,20 +113,12 @@
     <section id="online-screen" class="screen">
       <div class="panel online-panel">
         <button class="back-btn" onclick="goMenu()">← BACK</button>
-
         <p class="section-label">MULTIPLAYER</p>
         <h2>ONLINE BATTLE</h2>
-
         <div class="online-icon">🌐</div>
-
         <h3>COMING SOON</h3>
-        <p class="panel-description">
-          Online multiplayer requires a server connection.
-        </p>
-
-        <button class="secondary-btn" onclick="goMenu()">
-          RETURN TO MENU
-        </button>
+        <p class="panel-description">Online multiplayer requires a server connection.</p>
+        <button class="secondary-btn" onclick="goMenu()">RETURN TO MENU</button>
       </div>
     </section>
 
@@ -194,226 +127,110 @@
       <div class="vs-container">
         <p class="section-label">BATTLE CONFIRMED</p>
         <h2>GET READY!</h2>
-
         <div class="versus-layout">
           <div class="versus-player">
-            <img id="vs-tank1-image" src="tank-blue.png" alt="Player 1 tank">
+            <img id="vs-tank1-image" src="tank-blue.png" alt="Player 1">
             <h3 id="vs-player1-name">PLAYER 1</h3>
             <p>BLUE TEAM</p>
           </div>
-
           <div class="versus-text">VS</div>
-
           <div class="versus-player">
-            <img id="vs-tank2-image" src="tank-red.png" alt="Player 2 tank">
+            <img id="vs-tank2-image" src="tank-red.png" alt="Player 2">
             <h3 id="vs-player2-name">PLAYER 2</h3>
             <p>RED TEAM</p>
           </div>
         </div>
-
-        <button id="begin-battle-btn" class="primary-btn" onclick="startBattleMatch()">
-          ENTER BATTLEFIELD →
-        </button>
+        <button id="begin-battle-btn" class="primary-btn" onclick="startBattleMatch()">ENTER BATTLEFIELD →</button>
       </div>
     </section>
 
-    <!-- BATTLEFIELD -->
+    <!-- IMMERSIVE BATTLEFIELD SCREEN -->
     <section id="battle-screen" class="screen battle-screen">
-
-      <!-- BATTLE HUD -->
-      <header class="battle-topbar">
-
-        <div class="hud-player hud-player-one">
-          <div class="hud-player-info">
-            <span class="hud-team-label">BLUE TEAM</span>
-            <strong id="hud-name1">PLAYER 1</strong>
-            <span id="hud-health1-text">100 HP</span>
-          </div>
-
-          <div class="health-track">
-            <div id="health1-fill" class="health-fill"></div>
-          </div>
-        </div>
-
-        <div class="battle-round">
-          <span>ROUND</span>
-          <strong id="round-number">1</strong>
-          <span id="turn-indicator">PLAYER 1'S TURN</span>
-        </div>
-
-        <div class="hud-player hud-player-two">
-          <div class="hud-player-info">
-            <span class="hud-team-label">RED TEAM</span>
-            <strong id="hud-name2">PLAYER 2</strong>
-            <span id="hud-health2-text">100 HP</span>
-          </div>
-
-          <div class="health-track">
-            <div id="health2-fill" class="health-fill"></div>
-          </div>
-        </div>
-
-        <button
-          id="battle-menu-btn"
-          class="battle-menu-btn"
-          onclick="togglePause()"
-          aria-label="Open battle menu"
-          title="Battle menu"
-        >
-          ☰
-        </button>
-      </header>
-
-      <!-- PLAY AREA -->
       <div id="battlefield" class="battlefield">
+        
+        <!-- FLOATING IN-GAME HUD OVERLAYS -->
+        <div class="ingame-hud top-left">
+          <span id="hud-name1" class="hud-name blue-text">PLAYER 1</span>
+          <div class="mini-hp"><div id="health1-fill" class="hp-bar blue-hp"></div></div>
+          <span id="hud-health1-text" class="hp-num">100 HP</span>
+        </div>
 
+        <div class="ingame-hud top-center">
+          <span id="turn-indicator" class="turn-pill">ROUND 1 • TURN 1</span>
+        </div>
+
+        <div class="ingame-hud top-right">
+          <span id="hud-name2" class="hud-name red-text">PLAYER 2</span>
+          <div class="mini-hp"><div id="health2-fill" class="hp-bar red-hp"></div></div>
+          <span id="hud-health2-text" class="hp-num">100 HP</span>
+        </div>
+
+        <button id="battle-menu-btn" class="hud-menu-btn" onclick="togglePause()">☰</button>
+
+        <!-- CANVASES & TANKS -->
         <canvas id="terrain-canvas"></canvas>
         <canvas id="aim-canvas"></canvas>
 
         <div id="tank1" class="battle-tank">
-          <img id="tank1-image" src="tank-blue.png" alt="Player 1 tank">
-          <div class="tank-nameplate">
-            <span id="tank1-nameplate">PLAYER 1</span>
-          </div>
+          <img id="tank1-image" src="tank-blue.png" alt="Tank 1">
+          <div class="tank-badge" id="tank1-nameplate">PLAYER 1</div>
         </div>
 
         <div id="tank2" class="battle-tank">
-          <img id="tank2-image" src="tank-red.png" alt="Player 2 tank">
-          <div class="tank-nameplate">
-            <span id="tank2-nameplate">PLAYER 2</span>
-          </div>
+          <img id="tank2-image" src="tank-red.png" alt="Tank 2">
+          <div class="tank-badge" id="tank2-nameplate">PLAYER 2</div>
         </div>
 
         <div id="projectile-layer" class="projectile-layer"></div>
         <div id="effect-layer" class="effect-layer"></div>
 
+        <!-- FLOATING IN-GAME CONTROLS (BOTTOM OVERLAYS) -->
+        <div class="ingame-controls">
+          <div class="ctrl-group">
+            <button class="arcade-btn" onclick="moveTankAction(-1)">◀</button>
+            <span id="movement-time" class="moves-pill">3/3</span>
+            <button class="arcade-btn" onclick="moveTankAction(1)">▶</button>
+          </div>
+
+          <div class="ctrl-group power-group">
+            <div class="power-label">POWER: <span id="power-value">60%</span> | ANGLE: <span id="angle-value">45°</span></div>
+            <input id="shot-power" type="range" min="20" max="100" value="60" oninput="updatePower(this.value)">
+          </div>
+
+          <button class="arcade-fire-btn" onclick="fireShotAction()">FIRE!</button>
+        </div>
+
       </div>
-
-      <!-- BATTLE CONTROLS -->
-      <footer class="battle-controls">
-
-        <div class="movement-controls">
-          <span class="control-label">MOVEMENT</span>
-
-          <div class="movement-buttons">
-            <button
-              id="move-left-btn"
-              class="control-btn"
-              onclick="moveTankAction(-1)"
-              aria-label="Move tank left"
-              title="Move left"
-            >◀</button>
-
-            <span id="movement-time">3/3</span>
-
-            <button
-              id="move-right-btn"
-              class="control-btn"
-              onclick="moveTankAction(1)"
-              aria-label="Move tank right"
-              title="Move right"
-            >▶</button>
-          </div>
-        </div>
-
-        <div class="aim-controls">
-          <div class="aim-readout">
-            <label for="shot-power">SHOT POWER</label>
-            <strong id="power-value">60%</strong>
-          </div>
-
-          <input
-            id="shot-power"
-            type="range"
-            min="20"
-            max="100"
-            value="60"
-            step="1"
-            oninput="updatePower(this.value)"
-            aria-label="Shot power"
-          >
-
-          <div class="aim-angle">
-            <span>ANGLE</span>
-            <strong id="angle-value">45°</strong>
-          </div>
-        </div>
-
-        <button id="fire-btn" class="fire-btn" onclick="fireShotAction()">
-          <span>✦</span>
-          <strong>FIRE!</strong>
-        </button>
-
-      </footer>
 
       <!-- PAUSE MENU -->
       <div id="battle-menu-overlay" class="overlay hidden">
         <div class="overlay-panel">
           <p class="section-label">BATTLE PAUSED</p>
           <h2>GAME MENU</h2>
-
-          <button id="continue-btn" class="primary-btn" onclick="togglePause()">
-            CONTINUE BATTLE
-          </button>
-
-          <button id="save-match-btn" class="secondary-btn" onclick="saveMatchAction()">
-            SAVE MATCH
-          </button>
-
-          <button id="load-match-btn" class="secondary-btn" onclick="loadMatchAction()">
-            LOAD SAVED MATCH
-          </button>
-
-          <button id="restart-match-btn" class="secondary-btn" onclick="startBattleMatch()">
-            RESTART MATCH
-          </button>
-
-          <button id="return-menu-btn" class="danger-btn" onclick="goMenu()">
-            QUIT TO MAIN MENU
-          </button>
+          <button class="primary-btn" onclick="togglePause()">CONTINUE BATTLE</button>
+          <button class="secondary-btn" onclick="saveMatchAction()">SAVE MATCH</button>
+          <button class="secondary-btn" onclick="loadMatchAction()">LOAD MATCH</button>
+          <button class="secondary-btn" onclick="startBattleMatch()">RESTART MATCH</button>
+          <button class="danger-btn" onclick="goMenu()">QUIT TO MAIN MENU</button>
         </div>
       </div>
-
     </section>
 
     <!-- RESULTS -->
     <section id="result-screen" class="screen">
       <div class="result-container">
         <p id="result-eyebrow" class="section-label">BATTLE COMPLETE</p>
-
         <h2 id="result-title">VICTORY!</h2>
-
-        <div class="result-tank">
-          <img
-            id="result-tank-image"
-            src="tank-blue.png"
-            alt="Winning tank"
-          >
-        </div>
-
+        <div class="result-tank"><img id="result-tank-image" src="tank-blue.png" alt="Winner"></div>
         <h3 id="winner-name">PLAYER 1 WINS!</h3>
         <p id="result-description">The battlefield belongs to you.</p>
-
         <div class="result-stats">
-          <div class="result-stat">
-            <span id="result-health1-name">PLAYER 1</span>
-            <strong id="result-health1">100 HP</strong>
-          </div>
-
-          <div class="result-stat">
-            <span id="result-health2-name">PLAYER 2</span>
-            <strong id="result-health2">0 HP</strong>
-          </div>
+          <div class="result-stat"><span id="result-health1-name">PLAYER 1</span><strong id="result-health1">100 HP</strong></div>
+          <div class="result-stat"><span id="result-health2-name">PLAYER 2</span><strong id="result-health2">0 HP</strong></div>
         </div>
-
         <div class="result-buttons">
-          <button id="rematch-btn" class="primary-btn" onclick="startBattleMatch()">
-            ↻ REMATCH
-          </button>
-
-          <button id="result-menu-btn" class="secondary-btn" onclick="goMenu()">
-            MAIN MENU
-          </button>
+          <button class="primary-btn" onclick="startBattleMatch()">↻ REMATCH</button>
+          <button class="secondary-btn" onclick="goMenu()">MAIN MENU</button>
         </div>
       </div>
     </section>
@@ -422,66 +239,30 @@
     <section id="settings-screen" class="screen">
       <div class="panel settings-panel">
         <button class="back-btn" onclick="goMenu()">← BACK</button>
-
-        <p class="section-label">CUSTOMIZE YOUR EXPERIENCE</p>
+        <p class="section-label">CUSTOMIZE</p>
         <h2>SETTINGS</h2>
-
         <div class="settings-list">
-
           <div class="setting-row">
-            <div>
-              <strong>SOUND EFFECTS</strong>
-              <p>Enable or disable battle sounds.</p>
-            </div>
-
-            <label class="switch">
-              <input id="effects-toggle" type="checkbox" checked onchange="toggleEffects(this)">
-              <span class="switch-slider"></span>
-            </label>
+            <div><strong>SOUND EFFECTS</strong><p>Enable battle sounds.</p></div>
+            <label class="switch"><input id="effects-toggle" type="checkbox" checked onchange="toggleEffects(this)"><span class="switch-slider"></span></label>
           </div>
-
           <div class="setting-row">
-            <div>
-              <strong>BACKGROUND MUSIC</strong>
-              <p>Enable or disable background music.</p>
-            </div>
-
-            <label class="switch">
-              <input id="music-toggle" type="checkbox" onchange="toggleMusicSetting(this)">
-              <span class="switch-slider"></span>
-            </label>
+            <div><strong>BACKGROUND MUSIC</strong><p>Enable background music.</p></div>
+            <label class="switch"><input id="music-toggle" type="checkbox" onchange="toggleMusicSetting(this)"><span class="switch-slider"></span></label>
           </div>
-
           <div class="setting-row volume-setting">
-            <div>
-              <strong>VOLUME</strong>
-              <p>Adjust the game volume.</p>
-            </div>
-
+            <div><strong>VOLUME</strong><p>Adjust game volume.</p></div>
             <div class="volume-control">
-              <input
-                id="volume-slider"
-                type="range"
-                min="0"
-                max="100"
-                value="70"
-                oninput="updateVolume(this.value)"
-                aria-label="Game volume"
-              >
+              <input id="volume-slider" type="range" min="0" max="100" value="70" oninput="updateVolume(this.value)">
               <strong id="volume-value">70%</strong>
             </div>
           </div>
-
         </div>
-
-        <button id="reset-settings-btn" class="secondary-btn" onclick="resetSettingsAction()">
-          RESET SETTINGS
-        </button>
+        <button class="secondary-btn" onclick="resetSettingsAction()">RESET SETTINGS</button>
       </div>
     </section>
 
   </main>
-
   <script src="game.js"></script>
 </body>
 </html>
