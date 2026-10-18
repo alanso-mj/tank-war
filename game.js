@@ -2,8 +2,8 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
-  const SAVE_KEY = "tankWarLocalSaveV8";
-  const SETTINGS_KEY = "tankWarSettingsV8";
+  const SAVE_KEY = "tankWarLocalSaveV10";
+  const SETTINGS_KEY = "tankWarSettingsV10";
 
   const RULES = {
     health: 100,
@@ -124,7 +124,7 @@
     G.running && !G.paused && !G.busy && G.health[G.active] > 0 && !(G.mode === "computer" && G.active === 1);
 
   const size = () => ({
-    width: 1800, // Widescreen world width
+    width: 1800,
     height: E.field?.clientHeight || window.innerHeight || 500,
     viewWidth: E.field?.clientWidth || window.innerWidth || 800
   });
@@ -239,9 +239,21 @@
   function updatePlayerVisuals() {
     for (let p = 0; p < 2; p++) {
       const src = tankSrc(p);
-      if (E.previews[p]) E.previews[p].src = src;
-      if (E.vsImages[p]) E.vsImages[p].src = src;
-      if (E.tankImages[p]) E.tankImages[p].src = src;
+      if (E.previews[p]) {
+        E.previews[p].src = src;
+        E.previews[p].onerror = () => { E.previews[p].src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='40'><rect width='60' height='40' fill='%2345b8ff'/></svg>"; };
+      }
+      if (E.vsImages[p]) {
+        E.vsImages[p].src = src;
+        E.vsImages[p].onerror = () => { E.vsImages[p].src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='40'><rect width='60' height='40' fill='%2345b8ff'/></svg>"; };
+      }
+      if (E.tankImages[p]) {
+        E.tankImages[p].src = src;
+        E.tankImages[p].onerror = () => { E.tankImages[p].src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='40'><rect width='60' height='40' fill='%2345b8ff'/></svg>"; };
+      }
+      if (E.resultTankImage) {
+        E.resultTankImage.onerror = () => { E.resultTankImage.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='40'><rect width='60' height='40' fill='%2345b8ff'/></svg>"; };
+      }
       if (E.vsNames[p]) E.vsNames[p].textContent = playerName(p);
       if (E.hudNames[p]) E.hudNames[p].textContent = playerName(p);
       if (E.nameplates[p]) E.nameplates[p].textContent = playerName(p);
@@ -636,7 +648,6 @@
       shell.style.left = `${x}px`;
       shell.style.top = `${y}px`;
 
-      // Camera scrolls to follow shell
       updateCamera(x);
 
       if (G.crateActive && Math.hypot(x - G.cratePos.x, y - G.cratePos.y) < 24) {
@@ -682,7 +693,6 @@
     const blastRadius = weaponType === "heavy" ? RULES.blastRadius * 1.4 : RULES.blastRadius;
     const maxDmg = weaponType === "heavy" ? RULES.maxDamage * 1.6 : RULES.maxDamage;
 
-    // Big Crater deformation on terrain
     carveTerrain(x, blastRadius);
 
     const blast = document.createElement("div");
@@ -745,7 +755,6 @@
     });
   }
 
-  // 3-Second Defeat / Explosion Animation Sequence
   function playDefeatAnimation(loser, winner) {
     G.busy = true;
     updateCamera(G.x[loser]);
@@ -754,7 +763,6 @@
     let steps = 0;
     const interval = setInterval(() => {
       steps++;
-      // Spawn chain reaction explosion sparks
       const spark = document.createElement("div");
       const offsetX = (Math.random() - 0.5) * 50;
       const offsetY = (Math.random() - 0.5) * 50;
@@ -768,7 +776,6 @@
 
       if (steps >= 6) {
         clearInterval(interval);
-        // Final massive explosion flash
         const finalBoom = document.createElement("div");
         Object.assign(finalBoom.style, {
           position: "absolute", left: `${G.x[loser]}px`, top: `${groundAt(G.x[loser])}px`,
