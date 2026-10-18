@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tank War - Tactical Artillery Battle</title>
-  <link rel="stylesheet" href="style.css?v=3000">
+  <link rel="stylesheet" href="style.css?v=4000">
 </head>
 <body>
 
@@ -124,6 +124,9 @@
           <div id="tank2-nameplate" class="tank-badge">Player 2</div>
         </div>
 
+        <!-- Supply Crate Element -->
+        <div id="supply-crate" class="supply-crate hidden">🎁</div>
+
         <div id="projectile-layer"></div>
         <div id="effect-layer"></div>
       </div>
@@ -133,6 +136,7 @@
         <span id="hud-name1" class="hud-name blue-text">Player 1</span>
         <div class="mini-hp"><div id="health1-fill" class="hp-bar blue-hp" style="width: 100%;"></div></div>
         <span id="hud-health1-text" class="hp-num">100 HP</span>
+        <span id="p1-weapon" class="hp-num" style="color:var(--yellow); font-weight:800;">Ammo: Standard</span>
       </div>
 
       <div class="ingame-hud top-center">
@@ -144,6 +148,7 @@
         <span id="hud-name2" class="hud-name red-text">Player 2</span>
         <div class="mini-hp"><div id="health2-fill" class="hp-bar red-hp" style="width: 100%;"></div></div>
         <span id="hud-health2-text" class="hp-num">100 HP</span>
+        <span id="p2-weapon" class="hp-num" style="color:var(--yellow); font-weight:800;">Ammo: Standard</span>
       </div>
 
       <button id="battle-menu-btn" class="hud-menu-btn" type="button">⚙️</button>
@@ -206,13 +211,13 @@
           </div>
           <div class="setting-row">
             <div><h4>Background Music</h4><p>In-game battle soundtrack</p></div>
-            <label class="switch"><input type="checkbox" id="music-toggle"><span class="switch-slider"></span></label>
+            <label class="switch"><input type="checkbox" id="music-toggle" checked><span class="switch-slider"></span></label>
           </div>
           <div class="setting-row">
             <div><h4>Master Volume</h4><p>Adjust game audio levels</p></div>
             <div class="volume-control">
-              <input type="range" id="volume-slider" min="0" max="100" value="45">
-              <span id="volume-value" class="hp-num">45%</span>
+              <input type="range" id="volume-slider" min="0" max="100" value="50">
+              <span id="volume-value" class="hp-num">50%</span>
             </div>
           </div>
         </div>
@@ -222,6 +227,6 @@
 
   </div>
 
-  <script src="game.js?v=3000"></script>
+  <script src="game.js?v=4000"></script>
 </body>
 </html>
