@@ -270,3 +270,33 @@ html, body {
   .arcade-btn { width: 34px; height: 34px; }
   .hud-menu-btn { right: 100px; width: 30px; height: 30px; top: 10px; }
 }
+#battle-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#battle-screen.active {
+  display: flex;
+}
+
+#battlefield {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#world-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1800px;
+  height: 100%;
+}
