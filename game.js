@@ -2,8 +2,8 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
-  const SAVE_KEY = "tankWarLocalSaveV11";
-  const SETTINGS_KEY = "tankWarSettingsV11";
+  const SAVE_KEY = "tankWarLocalSaveV14";
+  const SETTINGS_KEY = "tankWarSettingsV14";
 
   const RULES = {
     health: 100,
@@ -83,7 +83,6 @@
   const aimCtx = E.aimCanvas?.getContext("2d");
 
   const G = {
-    mode: "local",
     running: false,
     paused: false,
     busy: false,
@@ -111,7 +110,6 @@
     settings: { effects: true, music: true, volume: 50 },
     audio: null,
     musicAudio: null,
-    aiTimer: null,
     unlockTimer: null
   };
 
@@ -122,7 +120,7 @@
   const isBattleActive = () => !!E.battle?.classList.contains("active");
 
   const canControl = () =>
-    G.running && !G.paused && !G.busy && G.health[G.active] > 0 && !(G.mode === "computer" && G.active === 1);
+    G.running && !G.paused && !G.busy && G.health[G.active] > 0;
 
   const size = () => ({
     width: 1800,
@@ -137,25 +135,6 @@
     } else if (elem.webkitRequestFullscreen) {
       elem.webkitRequestFullscreen();
     }
-  }
-
-  function notify(message) {
-    let el = $("game-notice");
-    if (!el) {
-      el = document.createElement("div");
-      el.id = "game-notice";
-      Object.assign(el.style, {
-        position: "fixed", left: "50%", bottom: "22px", transform: "translateX(-50%)",
-        zIndex: "99999", padding: "10px 16px", borderRadius: "8px", background: "#1c2b38",
-        color: "#fff", fontSize: "13px", fontWeight: "700", textAlign: "center",
-        pointerEvents: "none", opacity: "0", transition: "opacity .2s", border: "1px solid #354b5d"
-      });
-      document.body.appendChild(el);
-    }
-    el.textContent = message;
-    el.style.opacity = "1";
-    clearTimeout(el._timer);
-    el._timer = setTimeout(() => { el.style.opacity = "0"; }, 2500);
   }
 
   function buttonSound() {
@@ -214,7 +193,6 @@
     G.busy = false;
     G.dragging = false;
     clearInterval(G.moveInterval);
-    clearTimeout(G.aiTimer);
     clearTimeout(G.unlockTimer);
     E.pauseOverlay?.classList.add("hidden");
     E.crate?.classList.add("hidden");
@@ -275,7 +253,7 @@
     G.inventory = ["none", "none"];
     G.players = [
       { name: readPlayerName(0), tank: selectedTank(0) },
-      { name: G.mode === "computer" ? "Computer" : readPlayerName(1), tank: selectedTank(1) }
+      { name: readPlayerName(1), tank: selectedTank(1) }
     ];
     updatePlayerVisuals();
     updateHUD();
@@ -361,16 +339,16 @@
       if (!tank) continue;
       const y = groundAt(G.x[p]);
       tank.style.left = `${G.x[p]}px`;
-      tank.style.top = `${y - 12}px`;
+      tank.style.top = `${y - 14}px`; // Perfectly anchors tanks right on top of the ground
     }
     updateCamera();
   }
 
-  function updateCamera(targetX = null) {
+  function updateCamera() {
     if (!E.world || !E.field) return;
     const viewWidth = E.field.clientWidth || window.innerWidth;
-    const focusX = targetX !== null ? targetX : G.x[G.active];
-    let offsetX = viewWidth / 2 - focusX;
+    const centerX = (G.x[0] + G.x[1]) / 2;
+    let offsetX = viewWidth / 2 - centerX;
     offsetX = clamp(offsetX, -(1800 - viewWidth), 0);
     E.world.style.transform = `translateX(${offsetX}px)`;
   }
@@ -385,7 +363,6 @@
     E.crate.style.left = `${G.cratePos.x}px`;
     E.crate.style.top = `${G.cratePos.y}px`;
     E.crate.classList.remove("hidden");
-    notify("🎁 Supply Crate dropped! Shoot it to claim!");
   }
 
   function startMatch() {
@@ -395,23 +372,20 @@
       if (!isBattleActive()) return;
       resizeCanvases();
       const { width } = size();
-      G.x = [width * .25, width * .75];
+      G.x = [width * .3, width * .7];
       generateTerrain();
       drawTerrain();
       positionTanks();
       
-      // Cinematic Pre-Battle Tank Showcase with Failsafe Unlock Timer
       G.busy = true;
       G.running = true;
-      updateCamera(G.x[0]);
-      notify(`Battle Start! ${playerName(0)} vs ${playerName(1)}`);
+      updateCamera();
 
-      // Failsafe: Automatically release busy lock within 3 seconds no matter what
       clearTimeout(G.unlockTimer);
       G.unlockTimer = setTimeout(() => {
         if (G.running && G.busy) {
           G.busy = false;
-          updateCamera(G.x[G.active]);
+          updateCamera();
           updateHUD();
           drawAim();
         }
@@ -419,21 +393,16 @@
       
       setTimeout(() => {
         if (!G.running) return;
-        updateCamera(G.x[1]);
-        setTimeout(() => {
-          if (!G.running) return;
-          G.running = true;
-          G.angle = [45, 45];
-          G.power = 60;
-          G.busy = false;
-          clearTimeout(G.unlockTimer);
-          updateCamera(G.x[0]);
-          updateHUD();
-          drawAim();
-          spawnCrate();
-          maybeComputerTurn();
-        }, 1000);
-      }, 1000);
+        G.running = true;
+        G.angle = [45, 45];
+        G.power = 60;
+        G.busy = false;
+        clearTimeout(G.unlockTimer);
+        updateCamera();
+        updateHUD();
+        drawAim();
+        spawnCrate();
+      }, 1200);
     });
   }
 
@@ -455,7 +424,7 @@
     if (!aimCtx || !E.field) return;
     const { width, height } = size();
     aimCtx.clearRect(0, 0, width, height);
-    if (!G.running || G.paused || G.busy || (G.mode === "computer" && G.active === 1)) return;
+    if (!G.running || G.paused || G.busy) return;
 
     const start = muzzle(G.active);
     const vector = getVector(G.active);
@@ -525,7 +494,7 @@
     G.x[p] = next;
     G.steps[p]--;
     positionTanks();
-    updateCamera(G.x[p]);
+    updateCamera();
     drawAim();
     updateHUD();
   }
@@ -579,9 +548,9 @@
     menu.appendChild(title);
 
     const options = [
-      { id: "standard", label: "Standard (Keep Weapon)" },
-      { id: "cluster", label: "💥 Cluster Bomb" },
-      { id: "heavy", label: "💣 Heavy Shell" },
+      { id: "standard", label: "Standard (Keep)" },
+      { id: "cluster", label: "💥 Cluster" },
+      { id: "heavy", label: "💣 Heavy" },
       { id: "armor", label: "🛡️ +25 Armor" }
     ];
 
@@ -596,13 +565,9 @@
         buttonSound();
         if (opt.id === "armor") {
           G.health[player] = clamp(G.health[player] + 25, 0, 125);
-          notify(`🛡️ ${playerName(player)} gained +25 Armor!`);
-        } else if (opt.id === "standard") {
-          notify(`🎁 Saved item for future turns!`);
-        } else {
+        } else if (opt.id !== "standard") {
           G.weapons[player] = opt.id;
           G.inventory[player] = opt.id;
-          notify(`🎁 ${playerName(player)} equipped ${opt.label}!`);
         }
         removeCrateMenu();
         G.busy = false;
@@ -663,21 +628,11 @@
       shell.style.left = `${x}px`;
       shell.style.top = `${y}px`;
 
-      updateCamera(x);
-
       if (G.crateActive && Math.hypot(x - G.cratePos.x, y - G.cratePos.y) < 24) {
         shell.remove();
         G.crateActive = false;
         E.crate?.classList.add("hidden");
-        if (G.mode === "computer" && shooter === 1) {
-          const aiChoice = Math.random() < 0.5 ? "cluster" : "heavy";
-          G.weapons[1] = aiChoice;
-          notify(`🎁 Computer claimed the Supply Crate!`);
-          G.busy = false;
-          endTurn();
-        } else {
-          showCrateChoiceMenu(shooter);
-        }
+        showCrateChoiceMenu(shooter);
         return;
       }
 
@@ -745,7 +700,7 @@
     }
 
     drawTerrain();
-    positionTanks();
+    positionTanks(); // Instantly repositions tanks to the new crater floor!
     G.weapons[shooter] = "standard";
     updateHUD();
 
@@ -772,8 +727,7 @@
 
   function playDefeatAnimation(loser, winner) {
     G.busy = true;
-    updateCamera(G.x[loser]);
-    notify(`💥 Critical hit on ${playerName(loser)}!`);
+    updateCamera();
 
     let steps = 0;
     const interval = setInterval(() => {
@@ -818,33 +772,9 @@
     G.power = 60;
     
     G.busy = false;
-    updateCamera(G.x[G.active]);
+    updateCamera();
     updateHUD();
     drawAim();
-    maybeComputerTurn();
-  }
-
-  function maybeComputerTurn() {
-    if (!G.running || G.paused || G.mode !== "computer" || G.active !== 1) return;
-    G.busy = true;
-    updateCamera(G.x[1]);
-    updateHUD();
-    
-    clearTimeout(G.aiTimer);
-    G.aiTimer = setTimeout(() => {
-      if (!G.running || G.paused || G.mode !== "computer" || G.active !== 1) {
-        G.busy = false;
-        updateHUD();
-        return;
-      }
-      const dx = Math.abs(G.x[0] - G.x[1]);
-      G.angle[1] = clamp(28 + (dx / 12) - (G.wind * 0.4) + (Math.random() * 10 - 5), RULES.minAngle, RULES.maxAngle);
-      G.power = clamp(42 + (dx / 6) + (Math.random() * 12 - 6), 25, 95);
-      
-      G.busy = false;
-      updateHUD();
-      fireShot();
-    }, 1200);
   }
 
   function finishMatch(winner) {
@@ -852,7 +782,6 @@
     G.running = false;
     G.paused = false;
     G.busy = false;
-    clearTimeout(G.aiTimer);
     clearTimeout(G.unlockTimer);
     E.pauseOverlay?.classList.add("hidden");
     E.crate?.classList.add("hidden");
@@ -877,14 +806,13 @@
   }
 
   function saveMatch() {
-    if (!G.running) { notify("No active match to save."); return; }
+    if (!G.running) return;
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify({
-        mode: G.mode, active: G.active, round: G.round, health: G.health,
+        active: G.active, round: G.round, health: G.health,
         angle: G.angle, power: G.power, steps: G.steps, x: G.x, terrain: G.terrain, players: G.players, weapons: G.weapons
       }));
-      notify("Match saved successfully!");
-    } catch (_) { notify("Could not save match."); }
+    } catch (_) {}
   }
 
   function resetSettings() {
@@ -896,7 +824,6 @@
     stopMusic();
     updateAudioVolume();
     localStorage.removeItem(SETTINGS_KEY);
-    notify("Settings reset.");
   }
 
   function loadSettings() {
@@ -927,13 +854,10 @@
       buttonSound();
       triggerFullscreen();
       if (G.settings.music) startMusic();
-      showScreen(E.mode);
+      showScreen(E.setup);
     });
     $("online-btn")?.addEventListener("click", () => { buttonSound(); showScreen(E.online); });
     $("settings-btn")?.addEventListener("click", () => { buttonSound(); showScreen(E.settings); });
-
-    $("local-mode-btn")?.addEventListener("click", () => { buttonSound(); G.mode = "local"; showScreen(E.setup); });
-    $("computer-mode-btn")?.addEventListener("click", () => { buttonSound(); G.mode = "computer"; showScreen(E.setup); });
 
     $("start-match-btn")?.addEventListener("click", e => { e.preventDefault(); buttonSound(); prepareMatch(); });
     $("begin-battle-btn")?.addEventListener("click", () => { buttonSound(); startMatch(); });
