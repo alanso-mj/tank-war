@@ -2,8 +2,8 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
-  const SAVE_KEY = "tankWarLocalSaveV17";
-  const SETTINGS_KEY = "tankWarSettingsV17";
+  const SAVE_KEY = "tankWarLocalSaveV19";
+  const SETTINGS_KEY = "tankWarSettingsV19";
 
   const RULES = {
     health: 100,
@@ -26,6 +26,16 @@
     tank4: "tank4.png",
     tank5: "tank5.png",
     tank6: "tank6.png"
+  };
+
+  // Custom muzzle graphic mapping for every tank type
+  const MUZZLE_IMAGES = {
+    tank1: "muzzle1.png",
+    tank2: "muzzle2.png",
+    tank3: "muzzle3.png",
+    tank4: "muzzle4.png",
+    tank5: "muzzle5.png",
+    tank6: "muzzle6.png"
   };
 
   const MUSIC_FILE = "background-music.mp3";
@@ -115,6 +125,7 @@
   const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
   const other = player => player === 0 ? 1 : 0;
   const tankSrc = player => TANK_IMAGES[G.players[player].tank] || TANK_IMAGES.tank1;
+  const muzzleSrc = player => MUZZLE_IMAGES[G.players[player].tank] || MUZZLE_IMAGES.tank1;
   const playerName = player => G.players[player]?.name || `Player ${player + 1}`;
   const isBattleActive = () => !!E.battle?.classList.contains("active");
 
@@ -170,6 +181,7 @@
   }
 
   function showScreen(target) {
+    stopMatch();
     const screens = [E.menu, E.mode, E.setup, E.online, E.vs, E.battle, E.result, E.settings];
     screens.forEach(screen => screen?.classList.remove("active"));
     const screen = typeof target === "string" ? $(target) : target;
@@ -227,6 +239,7 @@
       }
       if (E.tankImages[p]) {
         E.tankImages[p].src = src;
+        E.tankImages[p].style.transform = p === 1 ? "scaleX(-1)" : "scaleX(1)";
         E.tankImages[p].onerror = () => { E.tankImages[p].src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='40'><rect width='60' height='40' fill='%2345b8ff'/></svg>"; };
       }
       if (E.resultTankImage) {
@@ -330,8 +343,8 @@
   function positionTanks() {
     const { width } = size();
     if (!width) return;
-    G.x[0] = clamp(G.x[0], 40, width * .45);
-    G.x[1] = clamp(G.x[1], width * .55, width - 40);
+    G.x[0] = clamp(G.x[0], 60, width * .45);
+    G.x[1] = clamp(G.x[1], width * .55, width - 60);
     for (let p = 0; p < 2; p++) {
       const tank = E.tanks[p];
       if (!tank) continue;
@@ -456,8 +469,8 @@
     if (!canControl() || G.steps[G.active] <= 0) return;
     const p = G.active;
     const { width } = size();
-    const min = p === 0 ? 40 : width * .52;
-    const max = p === 0 ? width * .48 : width - 40;
+    const min = p === 0 ? 60 : width * .52;
+    const max = p === 0 ? width * .48 : width - 60;
     const next = clamp(G.x[p] + direction * RULES.moveDistance, min, max);
     if (Math.abs(next - G.x[p]) < 1) return;
     G.x[p] = next;
@@ -487,8 +500,8 @@
     const dx = point.x - start.x;
     const dy = start.y - point.y;
     
-    if (G.active === 0 && dx <= 0) return;
-    if (G.active === 1 && dx >= 0) return;
+    if (G.active === 0 && dx < -5) return;
+    if (G.active === 1 && dx > 5) return;
 
     const angleRad = Math.atan2(dy, Math.abs(dx));
     G.angle[G.active] = clamp(angleRad * 180 / Math.PI, RULES.minAngle, RULES.maxAngle);
@@ -565,6 +578,22 @@
     const speed = 190 + G.power * 3.4;
     const weaponType = G.weapons[shooter];
 
+    // Spawn custom muzzle flash graphic at barrel tip
+    const flash = document.createElement("img");
+    flash.src = muzzleSrc(shooter);
+    flash.onerror = () => { flash.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><circle cx='12' cy='12' r='10' fill='%23ffaa00'/></svg>"; };
+    Object.assign(flash.style, {
+      position: "absolute", left: `${start.x}px`, top: `${start.y}px`,
+      width: "28px", height: "28px", transform: "translate(-50%, -50%) scale(1.4)",
+      zIndex: "40", pointerEvents: "none", transition: "transform 0.15s ease-out, opacity 0.15s ease-out"
+    });
+    E.effectLayer?.appendChild(flash);
+    setTimeout(() => {
+      flash.style.transform = "translate(-50%, -50%) scale(0.2)";
+      flash.style.opacity = "0";
+      setTimeout(() => flash.remove(), 150);
+    }, 60);
+
     let x = start.x;
     let y = start.y;
     let vx = vector.x * speed;
@@ -635,7 +664,6 @@
     const blastRadius = weaponType === "heavy" ? RULES.blastRadius * 1.3 : RULES.blastRadius;
     const maxDmg = weaponType === "heavy" ? RULES.maxDamage * 1.6 : RULES.maxDamage;
 
-    // CARVE MODERATE CRATERS
     carveTerrain(x, blastRadius * 0.75);
 
     const blast = document.createElement("div");
@@ -672,7 +700,7 @@
     }
 
     drawTerrain();
-    positionTanks(); // Snaps tanks securely to the new crater floors
+    positionTanks();
     G.weapons[shooter] = "standard";
     updateHUD();
 
@@ -691,7 +719,7 @@
     G.terrain.forEach(pt => {
       const dist = Math.abs(pt.x - cx);
       if (dist < radius) {
-        const depth = Math.sqrt(radius * radius - dist * dist) * 0.45; // Gentle crater depth
+        const depth = Math.sqrt(radius * radius - dist * dist) * 0.45;
         pt.y = Math.min(size().height * 0.88, pt.y + depth);
       }
     });
@@ -858,30 +886,37 @@
       drawAim();
     });
 
-    E.field?.addEventListener("pointerdown", e => {
-      if (!canControl()) return;
-      if (e.target.closest("button") || e.target.closest(".ingame-controls") || e.target.closest(".ingame-hud") || e.target.closest(".overlay") || e.target.closest("#crate-choice-menu")) {
-        return;
-      }
-      const rect = E.field.getBoundingClientRect();
-      G.dragging = true;
-      G.pointerId = e.pointerId;
-      setAngleFromPoint({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-    });
+    const field = E.field;
+    if (field) {
+      const newField = field.cloneNode(true);
+      field.parentNode.replaceChild(newField, field);
+      E.field = newField;
 
-    E.field?.addEventListener("pointermove", e => {
-      if (!G.dragging || e.pointerId !== G.pointerId) return;
-      const rect = E.field.getBoundingClientRect();
-      setAngleFromPoint({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-    });
+      E.field.addEventListener("pointerdown", e => {
+        if (!canControl()) return;
+        if (e.target.closest("button") || e.target.closest(".ingame-controls") || e.target.closest(".ingame-hud") || e.target.closest(".overlay") || e.target.closest("#crate-choice-menu")) {
+          return;
+        }
+        const rect = E.field.getBoundingClientRect();
+        G.dragging = true;
+        G.pointerId = e.pointerId;
+        setAngleFromPoint({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+      });
 
-    const endDrag = e => {
-      if (e.pointerId !== G.pointerId) return;
-      G.dragging = false;
-      G.pointerId = null;
-    };
-    E.field?.addEventListener("pointerup", endDrag);
-    E.field?.addEventListener("pointercancel", endDrag);
+      E.field.addEventListener("pointermove", e => {
+        if (!G.dragging || e.pointerId !== G.pointerId) return;
+        const rect = E.field.getBoundingClientRect();
+        setAngleFromPoint({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+      });
+
+      const endDrag = e => {
+        if (e.pointerId !== G.pointerId) return;
+        G.dragging = false;
+        G.pointerId = null;
+      };
+      E.field.addEventListener("pointerup", endDrag);
+      E.field.addEventListener("pointercancel", endDrag);
+    }
 
     E.names.forEach((input, index) => {
       input?.addEventListener("input", () => {
