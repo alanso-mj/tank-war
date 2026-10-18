@@ -2,8 +2,8 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
-  const SAVE_KEY = "tankWarLocalSaveV15";
-  const SETTINGS_KEY = "tankWarSettingsV15";
+  const SAVE_KEY = "tankWarLocalSaveV17";
+  const SETTINGS_KEY = "tankWarSettingsV17";
 
   const RULES = {
     health: 100,
@@ -14,7 +14,7 @@
     minPower: 20,
     maxPower: 100,
     gravity: 480,
-    blastRadius: 95,
+    blastRadius: 80,
     maxDamage: 32,
     minDamage: 5
   };
@@ -109,8 +109,7 @@
     moveInterval: null,
     settings: { effects: true, music: true, volume: 50 },
     audio: null,
-    musicAudio: null,
-    unlockTimer: null
+    musicAudio: null
   };
 
   const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
@@ -193,7 +192,6 @@
     G.busy = false;
     G.dragging = false;
     clearInterval(G.moveInterval);
-    clearTimeout(G.unlockTimer);
     E.pauseOverlay?.classList.add("hidden");
     E.crate?.classList.add("hidden");
     removeCrateMenu();
@@ -341,7 +339,6 @@
       tank.style.left = `${G.x[p]}px`;
       tank.style.top = `${y - 14}px`;
       
-      // Face Player 1 right and Player 2 left toward each other strictly
       if (E.tankImages[p]) {
         E.tankImages[p].style.transform = p === 1 ? "scaleX(-1)" : "scaleX(1)";
       }
@@ -382,36 +379,17 @@
       drawTerrain();
       positionTanks();
       
-      G.busy = true;
       G.running = true;
+      G.angle = [45, 45];
+      G.power = 60;
+      G.busy = false;
       updateCamera();
-
-      clearTimeout(G.unlockTimer);
-      G.unlockTimer = setTimeout(() => {
-        if (G.running && G.busy) {
-          G.busy = false;
-          updateCamera();
-          updateHUD();
-          drawAim();
-        }
-      }, 3000);
-      
-      setTimeout(() => {
-        if (!G.running) return;
-        G.running = true;
-        G.angle = [45, 45];
-        G.power = 60;
-        G.busy = false;
-        clearTimeout(G.unlockTimer);
-        updateCamera();
-        updateHUD();
-        drawAim();
-        spawnCrate();
-      }, 1200);
+      updateHUD();
+      drawAim();
+      spawnCrate();
     });
   }
 
-  // Proper directional vector: Player 0 fires right (+X), Player 1 fires left (-X)
   function getVector(player) {
     const direction = player === 0 ? 1 : -1;
     const rad = G.angle[player] * Math.PI / 180;
@@ -426,7 +404,6 @@
     };
   }
 
-  // Draw straight, clear aiming line indicator
   function drawAim() {
     if (!aimCtx || !E.field) return;
     const { width, height } = size();
@@ -435,9 +412,10 @@
 
     const start = muzzle(G.active);
     const vector = getVector(G.active);
-    const lineLength = 65 + (G.power * 0.6);
+    const lineLength = 70 + (G.power * 0.6);
 
     aimCtx.save();
+    aimCtx.setLineDash([4, 6]);
     aimCtx.beginPath();
     aimCtx.moveTo(start.x, start.y);
     aimCtx.lineTo(start.x + vector.x * lineLength, start.y + vector.y * lineLength);
@@ -503,15 +481,17 @@
     clearInterval(G.moveInterval);
   }
 
-  // Consistent touch/click aiming for both Player 1 and Player 2
   function setAngleFromPoint(point) {
     if (!canControl()) return;
     const start = muzzle(G.active);
-    const direction = G.active === 0 ? 1 : -1;
-    const dx = (point.x - start.x) * direction;
+    const dx = point.x - start.x;
     const dy = start.y - point.y;
-    if (dx <= 0) return;
-    G.angle[G.active] = clamp(Math.atan2(dy, dx) * 180 / Math.PI, RULES.minAngle, RULES.maxAngle);
+    
+    if (G.active === 0 && dx <= 0) return;
+    if (G.active === 1 && dx >= 0) return;
+
+    const angleRad = Math.atan2(dy, Math.abs(dx));
+    G.angle[G.active] = clamp(angleRad * 180 / Math.PI, RULES.minAngle, RULES.maxAngle);
     if (E.angle) E.angle.textContent = `${Math.round(G.angle[G.active])}°`;
     drawAim();
   }
@@ -652,10 +632,11 @@
   function explode(x, y, target, shooter, weaponType, token) {
     if (token !== G.matchToken || !G.running) return;
 
-    const blastRadius = weaponType === "heavy" ? RULES.blastRadius * 1.4 : RULES.blastRadius;
+    const blastRadius = weaponType === "heavy" ? RULES.blastRadius * 1.3 : RULES.blastRadius;
     const maxDmg = weaponType === "heavy" ? RULES.maxDamage * 1.6 : RULES.maxDamage;
 
-    carveTerrain(x, blastRadius);
+    // CARVE MODERATE CRATERS
+    carveTerrain(x, blastRadius * 0.75);
 
     const blast = document.createElement("div");
     Object.assign(blast.style, {
@@ -678,9 +659,8 @@
       setTimeout(() => {
         for (let i = -1; i <= 1; i++) {
           const cx = x + i * 30;
-          const cy = groundAt(cx) - 10;
-          carveTerrain(cx, blastRadius * 0.6);
-          const subDist = Math.hypot(cx - G.x[target], cy - targetY);
+          carveTerrain(cx, blastRadius * 0.45);
+          const subDist = Math.hypot(cx - G.x[target], groundAt(cx) - 14 - targetY);
           if (subDist <= RULES.blastRadius) {
             G.health[target] = Math.max(0, G.health[target] - 10);
           }
@@ -692,7 +672,7 @@
     }
 
     drawTerrain();
-    positionTanks();
+    positionTanks(); // Snaps tanks securely to the new crater floors
     G.weapons[shooter] = "standard";
     updateHUD();
 
@@ -711,7 +691,7 @@
     G.terrain.forEach(pt => {
       const dist = Math.abs(pt.x - cx);
       if (dist < radius) {
-        const depth = Math.sqrt(radius * radius - dist * dist) * 0.6;
+        const depth = Math.sqrt(radius * radius - dist * dist) * 0.45; // Gentle crater depth
         pt.y = Math.min(size().height * 0.88, pt.y + depth);
       }
     });
@@ -774,7 +754,6 @@
     G.running = false;
     G.paused = false;
     G.busy = false;
-    clearTimeout(G.unlockTimer);
     E.pauseOverlay?.classList.add("hidden");
     E.crate?.classList.add("hidden");
     removeCrateMenu();
