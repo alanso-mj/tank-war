@@ -2,8 +2,8 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
-  const SAVE_KEY = "tankWarLocalSaveV5";
-  const SETTINGS_KEY = "tankWarSettingsV5";
+  const SAVE_KEY = "tankWarLocalSaveV6";
+  const SETTINGS_KEY = "tankWarSettingsV6";
 
   const RULES = {
     health: 100,
@@ -13,9 +13,9 @@
     maxAngle: 85,
     minPower: 20,
     maxPower: 100,
-    gravity: 430,
-    blastRadius: 105,
-    maxDamage: 45,
+    gravity: 500,       // Heavy tactical arc gravity
+    blastRadius: 55,     // Small, precise terrain cracks
+    maxDamage: 25,
     minDamage: 5
   };
 
@@ -88,10 +88,10 @@
     round: 1,
     health: [RULES.health, RULES.health],
     angle: [45, 45],
-    power: 65,
+    power: 60,
     steps: [RULES.movesPerTurn, RULES.movesPerTurn],
     x: [0, 0],
-    weapons: ["standard", "standard"], // Special weapon inventory per player
+    weapons: ["standard", "standard"],
     crateActive: false,
     cratePos: { x: 0, y: 0 },
     terrain: [],
@@ -138,9 +138,9 @@
       el.id = "game-notice";
       Object.assign(el.style, {
         position: "fixed", left: "50%", bottom: "22px", transform: "translateX(-50%)",
-        zIndex: "99999", padding: "12px 18px", borderRadius: "10px", background: "#202b39",
-        color: "#fff", fontSize: "14px", fontWeight: "700", textAlign: "center",
-        pointerEvents: "none", opacity: "0", transition: "opacity .2s"
+        zIndex: "99999", padding: "10px 16px", borderRadius: "8px", background: "#1c2b38",
+        color: "#fff", fontSize: "13px", fontWeight: "700", textAlign: "center",
+        pointerEvents: "none", opacity: "0", transition: "opacity .2s", border: "1px solid #354b5d"
       });
       document.body.appendChild(el);
     }
@@ -208,6 +208,7 @@
     clearTimeout(G.aiTimer);
     E.pauseOverlay?.classList.add("hidden");
     E.crate?.classList.add("hidden");
+    removeCrateMenu();
     if (E.projectileLayer) E.projectileLayer.replaceChildren();
     if (E.effectLayer) E.effectLayer.replaceChildren();
   }
@@ -245,7 +246,7 @@
     G.round = 1;
     G.health = [RULES.health, RULES.health];
     G.angle = [45, 45];
-    G.power = 65;
+    G.power = 60;
     G.steps = [RULES.movesPerTurn, RULES.movesPerTurn];
     G.weapons = ["standard", "standard"];
     G.players = [
@@ -281,8 +282,8 @@
     for (let x = 0; x <= width; x += step) {
       const t = x / width;
       const y = clamp(
-        height * .72 + Math.sin(t * Math.PI * 2) * height * .055,
-        height * .48, height * .84
+        height * .72 + Math.sin(t * Math.PI * 2.2) * height * .06,
+        height * .48, height * .82
       );
       G.terrain.push({ x, y });
     }
@@ -330,8 +331,8 @@
   function positionTanks() {
     const { width } = size();
     if (!width) return;
-    G.x[0] = clamp(G.x[0], 28, width * .45);
-    G.x[1] = clamp(G.x[1], width * .55, width - 28);
+    G.x[0] = clamp(G.x[0], 28, width * .42);
+    G.x[1] = clamp(G.x[1], width * .58, width - 28);
     for (let p = 0; p < 2; p++) {
       const tank = E.tanks[p];
       if (!tank) continue;
@@ -345,7 +346,7 @@
     const { width } = size();
     if (!width || !E.crate) return;
     G.cratePos.x = width * (.35 + Math.random() * .3);
-    G.cratePos.y = groundAt(G.cratePos.x) - 75; // Hovers right above terrain
+    G.cratePos.y = groundAt(G.cratePos.x) - 70;
     G.crateActive = true;
 
     E.crate.style.left = `${G.cratePos.x}px`;
@@ -361,11 +362,13 @@
       if (!isBattleActive()) return;
       resizeCanvases();
       const { width } = size();
-      G.x = [width * .13, width * .87];
+      G.x = [width * .12, width * .88];
       generateTerrain();
       drawTerrain();
       positionTanks();
       G.running = true;
+      G.angle[0] = 45;
+      G.angle[1] = 45;
       updateHUD();
       drawAim();
       spawnCrate();
@@ -395,10 +398,10 @@
 
     const start = muzzle(G.active);
     const v = getVector(G.active);
-    const length = 55 + G.power * 1.1;
+    const length = 50 + G.power * 1.0;
 
     aimCtx.save();
-    aimCtx.setLineDash([5, 5]);
+    aimCtx.setLineDash([4, 4]);
     aimCtx.beginPath();
     aimCtx.moveTo(start.x, start.y);
     aimCtx.lineTo(start.x + v.x * length, start.y + v.y * length);
@@ -421,7 +424,7 @@
       if (E.hpFills[p]) E.hpFills[p].style.width = `${clamp(G.health[p], 0, 100)}%`;
       if (E.weaponTexts[p]) {
         const w = G.weapons[p];
-        E.weaponTexts[p].textContent = w === "cluster" ? "Ammo: 💥 Cluster" : w === "heavy" ? "Ammo: 💣 Heavy" : "Ammo: Standard";
+        E.weaponTexts[p].textContent = w === "cluster" ? "Ammo: 💥 Cluster" : w === "heavy" ? "Ammo: 💣 Heavy" : w === "armor" ? "Ammo: 🛡️ Armor" : "Ammo: Standard";
       }
     }
 
@@ -437,8 +440,8 @@
     if (!canControl() || G.steps[G.active] <= 0) return;
     const p = G.active;
     const { width } = size();
-    const min = p === 0 ? 28 : width * .53;
-    const max = p === 0 ? width * .47 : width - 28;
+    const min = p === 0 ? 28 : width * .52;
+    const max = p === 0 ? width * .48 : width - 28;
     const next = clamp(G.x[p] + direction * RULES.moveDistance, min, max);
     if (Math.abs(next - G.x[p]) < 1) return;
     G.x[p] = next;
@@ -460,6 +463,64 @@
     drawAim();
   }
 
+  function removeCrateMenu() {
+    const existing = $("crate-choice-menu");
+    if (existing) existing.remove();
+  }
+
+  function showCrateChoiceMenu(player) {
+    removeCrateMenu();
+    G.busy = true;
+
+    const menu = document.createElement("div");
+    menu.id = "crate-choice-menu";
+    Object.assign(menu.style, {
+      position: "absolute", bottom: "75px", left: "50%", transform: "translateX(-50%)",
+      zIndex: "999", background: "rgba(18, 28, 38, 0.95)", border: "1px solid #354b5d",
+      borderRadius: "10px", padding: "8px 12px", display: "flex", gap: "6px", alignItems: "center",
+      boxShadow: "0 8px 25px rgba(0,0,0,0.6)"
+    });
+
+    const title = document.createElement("div");
+    title.textContent = "🎁 SUPPLY DROP CHOOSE:";
+    Object.assign(title.style, { fontSize: "0.6rem", fontWeight: "900", color: "#ffce68", marginRight: "4px" });
+    menu.appendChild(title);
+
+    const options = [
+      { id: "standard", label: "Standard (Keep Turn)" },
+      { id: "cluster", label: "💥 Cluster" },
+      { id: "heavy", label: "💣 Heavy" },
+      { id: "armor", label: "🛡️ +25 Armor" }
+    ];
+
+    options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.textContent = opt.label;
+      Object.assign(btn.style, {
+        background: "#1c2b38", border: "1px solid #354b5d", color: "#fff",
+        padding: "6px 10px", borderRadius: "6px", fontSize: "0.65rem", fontWeight: "800", cursor: "pointer"
+      });
+      btn.addEventListener("click", () => {
+        buttonSound();
+        if (opt.id === "armor") {
+          G.health[player] = clamp(G.health[player] + 25, 0, 125);
+          G.weapons[player] = "standard";
+          notify(`🛡️ ${playerName(player)} gained +25 Armor!`);
+        } else {
+          G.weapons[player] = opt.id;
+          notify(`🎁 ${playerName(player)} equipped ${opt.label}!`);
+        }
+        removeCrateMenu();
+        G.busy = false;
+        updateHUD();
+        endTurn();
+      });
+      menu.appendChild(btn);
+    });
+
+    E.battle?.appendChild(menu);
+  }
+
   function fireShot() {
     if (!canControl()) return;
     G.busy = true;
@@ -470,7 +531,7 @@
     const shooter = G.active;
     const start = muzzle(shooter);
     const vector = getVector(shooter);
-    const speed = 220 + G.power * 4.0;
+    const speed = 190 + G.power * 3.4;
     const weaponType = G.weapons[shooter];
 
     let x = start.x;
@@ -482,7 +543,7 @@
 
     const shell = document.createElement("div");
     Object.assign(shell.style, {
-      position: "absolute", left: `${x}px`, top: `${y}px`, width: "10px", height: "10px",
+      position: "absolute", left: `${x}px`, top: `${y}px`, width: "9px", height: "9px",
       borderRadius: "50%", background: weaponType === "heavy" ? "#ff9130" : weaponType === "cluster" ? "#ffd700" : (shooter === 0 ? "#8ed5ff" : "#ff8b72"),
       boxShadow: "0 0 10px rgba(255,190,90,.9)", transform: "translate(-50%, -50%)"
     });
@@ -506,16 +567,19 @@
       shell.style.left = `${x}px`;
       shell.style.top = `${y}px`;
 
-      // Check if bullet hits the supply crate in the sky!
-      if (G.crateActive && Math.hypot(x - G.cratePos.x, y - G.cratePos.y) < 25) {
+      if (G.crateActive && Math.hypot(x - G.cratePos.x, y - G.cratePos.y) < 22) {
         shell.remove();
         G.crateActive = false;
         E.crate?.classList.add("hidden");
-        const reward = Math.random() < 0.5 ? "cluster" : "heavy";
-        G.weapons[shooter] = reward;
-        notify(`🎁 ${playerName(shooter)} opened the Supply Crate! Got ${reward === "cluster" ? "Cluster Bomb" : "Heavy Artillery"}!`);
-        updateHUD();
-        endTurn();
+        if (G.mode === "computer" && shooter === 1) {
+          const aiChoice = Math.random() < 0.5 ? "cluster" : "heavy";
+          G.weapons[1] = aiChoice;
+          notify(`🎁 Computer claimed the Supply Crate!`);
+          G.busy = false;
+          endTurn();
+        } else {
+          showCrateChoiceMenu(shooter);
+        }
         return;
       }
 
@@ -523,7 +587,7 @@
       const target = other(shooter);
       const targetPoint = { x: G.x[target], y: groundAt(G.x[target]) - 14 };
 
-      if (Math.hypot(x - targetPoint.x, y - targetPoint.y) < 22) {
+      if (Math.hypot(x - targetPoint.x, y - targetPoint.y) < 20) {
         shell.remove();
         explode(x, y, target, shooter, weaponType, token);
         return;
@@ -543,8 +607,8 @@
   function explode(x, y, target, shooter, weaponType, token) {
     if (token !== G.matchToken || !G.running) return;
 
-    const blastRadius = weaponType === "heavy" ? RULES.blastRadius * 1.4 : RULES.blastRadius;
-    const maxDmg = weaponType === "heavy" ? RULES.maxDamage * 1.8 : RULES.maxDamage;
+    const blastRadius = weaponType === "heavy" ? RULES.blastRadius * 1.3 : RULES.blastRadius;
+    const maxDmg = weaponType === "heavy" ? RULES.maxDamage * 1.5 : RULES.maxDamage;
 
     const blast = document.createElement("div");
     Object.assign(blast.style, {
@@ -563,31 +627,29 @@
       G.health[target] = Math.max(0, G.health[target] - damage);
     }
 
-    // If cluster bomb, trigger secondary sub-explosions
     if (weaponType === "cluster") {
       setTimeout(() => {
         for (let i = -1; i <= 1; i++) {
-          const cx = x + i * 35;
+          const cx = x + i * 25;
           const cy = groundAt(cx) - 10;
           const subDist = Math.hypot(cx - G.x[target], cy - targetY);
           if (subDist <= RULES.blastRadius) {
-            G.health[target] = Math.max(0, G.health[target] - 15);
+            G.health[target] = Math.max(0, G.health[target] - 8);
           }
         }
         updateHUD();
       }, 200);
     }
 
-    // Reset weapon back to standard after use
     G.weapons[shooter] = "standard";
     updateHUD();
 
-    setTimeout(() => blast.remove(), 400);
+    setTimeout(() => blast.remove(), 350);
     setTimeout(() => {
       if (token !== G.matchToken || !G.running) return;
       if (G.health[target] <= 0) finishMatch(shooter);
       else endTurn();
-    }, 400);
+    }, 350);
   }
 
   function endTurn() {
@@ -595,6 +657,7 @@
     G.active = other(G.active);
     if (G.active === 0) G.round++;
     G.steps = [RULES.movesPerTurn, RULES.movesPerTurn];
+    G.angle[G.active] = 45; // Reset aim to default every round/turn
     G.busy = false;
     updateHUD();
     drawAim();
@@ -613,13 +676,14 @@
         updateHUD();
         return;
       }
-      G.angle[1] = clamp(25 + Math.random() * 35, RULES.minAngle, RULES.maxAngle);
-      G.power = clamp(40 + Math.random() * 40, 30, 95);
+      const dx = Math.abs(G.x[0] - G.x[1]);
+      G.angle[1] = clamp(25 + (dx / 12) + (Math.random() * 12 - 6), RULES.minAngle, RULES.maxAngle);
+      G.power = clamp(40 + (dx / 6) + (Math.random() * 15 - 7.5), 25, 95);
       
       G.busy = false;
       updateHUD();
       fireShot();
-    }, 1000);
+    }, 1200);
   }
 
   function finishMatch(winner) {
@@ -630,6 +694,7 @@
     clearTimeout(G.aiTimer);
     E.pauseOverlay?.classList.add("hidden");
     E.crate?.classList.add("hidden");
+    removeCrateMenu();
 
     if (E.winner) E.winner.textContent = `${playerName(winner)} WINS!`;
     if (E.resultTankImage) E.resultTankImage.src = tankSrc(winner);
@@ -658,27 +723,6 @@
       }));
       notify("Match saved successfully!");
     } catch (_) { notify("Could not save match."); }
-  }
-
-  function loadMatch() {
-    try {
-      const save = JSON.parse(localStorage.getItem(SAVE_KEY));
-      if (!save) { notify("No saved match found."); return; }
-      stopMatch();
-      Object.assign(G, save);
-      showScreen(E.battle);
-      requestAnimationFrame(() => {
-        resizeCanvases();
-        G.running = true;
-        drawTerrain();
-        updatePlayerVisuals();
-        positionTanks();
-        updateHUD();
-        drawAim();
-        if (G.crateActive) E.crate?.classList.remove("hidden");
-        notify("Match loaded!");
-      });
-    } catch (_) { notify("Failed to load match."); }
   }
 
   function resetSettings() {
@@ -746,14 +790,14 @@
     E.fire?.addEventListener("click", () => { buttonSound(); fireShot(); });
 
     E.power?.addEventListener("input", () => {
-      G.power = clamp(Number(E.power.value) || 65, RULES.minPower, RULES.maxPower);
+      G.power = clamp(Number(E.power.value) || 60, RULES.minPower, RULES.maxPower);
       updateHUD();
       drawAim();
     });
 
     E.field?.addEventListener("pointerdown", e => {
       if (!canControl()) return;
-      if (e.target.closest("button") || e.target.closest(".ingame-controls") || e.target.closest(".ingame-hud") || e.target.closest(".overlay")) {
+      if (e.target.closest("button") || e.target.closest(".ingame-controls") || e.target.closest(".ingame-hud") || e.target.closest(".overlay") || e.target.closest("#crate-choice-menu")) {
         return;
       }
       const rect = E.field.getBoundingClientRect();
