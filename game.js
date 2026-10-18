@@ -2,8 +2,8 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
-  const SAVE_KEY = "tankWarLocalSaveV10";
-  const SETTINGS_KEY = "tankWarSettingsV10";
+  const SAVE_KEY = "tankWarLocalSaveV11";
+  const SETTINGS_KEY = "tankWarSettingsV11";
 
   const RULES = {
     health: 100,
@@ -14,7 +14,7 @@
     minPower: 20,
     maxPower: 100,
     gravity: 480,
-    blastRadius: 95,     // Big craters!
+    blastRadius: 95,
     maxDamage: 32,
     minDamage: 5
   };
@@ -111,7 +111,8 @@
     settings: { effects: true, music: true, volume: 50 },
     audio: null,
     musicAudio: null,
-    aiTimer: null
+    aiTimer: null,
+    unlockTimer: null
   };
 
   const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
@@ -214,6 +215,7 @@
     G.dragging = false;
     clearInterval(G.moveInterval);
     clearTimeout(G.aiTimer);
+    clearTimeout(G.unlockTimer);
     E.pauseOverlay?.classList.add("hidden");
     E.crate?.classList.add("hidden");
     removeCrateMenu();
@@ -398,10 +400,22 @@
       drawTerrain();
       positionTanks();
       
-      // Cinematic Pre-Battle Tank Showcase
+      // Cinematic Pre-Battle Tank Showcase with Failsafe Unlock Timer
       G.busy = true;
+      G.running = true;
       updateCamera(G.x[0]);
       notify(`Battle Start! ${playerName(0)} vs ${playerName(1)}`);
+
+      // Failsafe: Automatically release busy lock within 3 seconds no matter what
+      clearTimeout(G.unlockTimer);
+      G.unlockTimer = setTimeout(() => {
+        if (G.running && G.busy) {
+          G.busy = false;
+          updateCamera(G.x[G.active]);
+          updateHUD();
+          drawAim();
+        }
+      }, 3000);
       
       setTimeout(() => {
         if (!G.running) return;
@@ -412,13 +426,14 @@
           G.angle = [45, 45];
           G.power = 60;
           G.busy = false;
+          clearTimeout(G.unlockTimer);
           updateCamera(G.x[0]);
           updateHUD();
           drawAim();
           spawnCrate();
           maybeComputerTurn();
-        }, 1200);
-      }, 1200);
+        }, 1000);
+      }, 1000);
     });
   }
 
@@ -838,6 +853,7 @@
     G.paused = false;
     G.busy = false;
     clearTimeout(G.aiTimer);
+    clearTimeout(G.unlockTimer);
     E.pauseOverlay?.classList.add("hidden");
     E.crate?.classList.add("hidden");
     removeCrateMenu();
