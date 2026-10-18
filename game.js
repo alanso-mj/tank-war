@@ -2,8 +2,8 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
-  const SAVE_KEY = "tankWarLocalSaveV6";
-  const SETTINGS_KEY = "tankWarSettingsV6";
+  const SAVE_KEY = "tankWarLocalSaveV8";
+  const SETTINGS_KEY = "tankWarSettingsV8";
 
   const RULES = {
     health: 100,
@@ -13,17 +13,19 @@
     maxAngle: 85,
     minPower: 20,
     maxPower: 100,
-    gravity: 500,       // Heavy tactical arc gravity
-    blastRadius: 55,     // Small, precise terrain cracks
-    maxDamage: 25,
+    gravity: 480,
+    blastRadius: 95,     // Big craters!
+    maxDamage: 32,
     minDamage: 5
   };
 
   const TANK_IMAGES = {
-    tank1: "tank-blue.png",
-    tank2: "tank-red.png",
-    tank3: "tank-blue.png",
-    tank4: "tank-red.png"
+    tank1: "tank1.png",
+    tank2: "tank2.png",
+    tank3: "tank3.png",
+    tank4: "tank4.png",
+    tank5: "tank5.png",
+    tank6: "tank6.png"
   };
 
   const MUSIC_FILE = "background-music.mp3";
@@ -39,6 +41,7 @@
     result: $("result-screen"),
     settings: $("settings-screen"),
     field: $("battlefield"),
+    world: $("world-container"),
     terrainCanvas: $("terrain-canvas"),
     aimCanvas: $("aim-canvas"),
     tanks: [$("tank1"), $("tank2")],
@@ -86,12 +89,14 @@
     busy: false,
     active: 0,
     round: 1,
+    wind: 0,
     health: [RULES.health, RULES.health],
     angle: [45, 45],
     power: 60,
     steps: [RULES.movesPerTurn, RULES.movesPerTurn],
     x: [0, 0],
     weapons: ["standard", "standard"],
+    inventory: ["none", "none"],
     crateActive: false,
     cratePos: { x: 0, y: 0 },
     terrain: [],
@@ -102,6 +107,7 @@
     dragging: false,
     pointerId: null,
     matchToken: 0,
+    moveInterval: null,
     settings: { effects: true, music: true, volume: 50 },
     audio: null,
     musicAudio: null,
@@ -118,8 +124,9 @@
     G.running && !G.paused && !G.busy && G.health[G.active] > 0 && !(G.mode === "computer" && G.active === 1);
 
   const size = () => ({
-    width: E.field?.clientWidth || window.innerWidth || 800,
-    height: E.field?.clientHeight || window.innerHeight || 500
+    width: 1800, // Widescreen world width
+    height: E.field?.clientHeight || window.innerHeight || 500,
+    viewWidth: E.field?.clientWidth || window.innerWidth || 800
   });
 
   function triggerFullscreen() {
@@ -205,6 +212,7 @@
     G.paused = false;
     G.busy = false;
     G.dragging = false;
+    clearInterval(G.moveInterval);
     clearTimeout(G.aiTimer);
     E.pauseOverlay?.classList.add("hidden");
     E.crate?.classList.add("hidden");
@@ -244,11 +252,13 @@
     stopMatch();
     G.active = 0;
     G.round = 1;
+    G.wind = Math.round((Math.random() * 50) - 25);
     G.health = [RULES.health, RULES.health];
     G.angle = [45, 45];
     G.power = 60;
     G.steps = [RULES.movesPerTurn, RULES.movesPerTurn];
     G.weapons = ["standard", "standard"];
+    G.inventory = ["none", "none"];
     G.players = [
       { name: readPlayerName(0), tank: selectedTank(0) },
       { name: G.mode === "computer" ? "Computer" : readPlayerName(1), tank: selectedTank(1) }
@@ -261,7 +271,6 @@
   function resizeCanvases() {
     if (!E.field || !terrainCtx || !aimCtx) return;
     const { width, height } = size();
-    if (!width || !height) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     for (const canvas of [E.terrainCanvas, E.aimCanvas]) {
       if (!canvas) continue;
@@ -282,7 +291,7 @@
     for (let x = 0; x <= width; x += step) {
       const t = x / width;
       const y = clamp(
-        height * .72 + Math.sin(t * Math.PI * 2.2) * height * .06,
+        height * .72 + Math.sin(t * Math.PI * 3.5) * height * .08,
         height * .48, height * .82
       );
       G.terrain.push({ x, y });
@@ -331,8 +340,8 @@
   function positionTanks() {
     const { width } = size();
     if (!width) return;
-    G.x[0] = clamp(G.x[0], 28, width * .42);
-    G.x[1] = clamp(G.x[1], width * .58, width - 28);
+    G.x[0] = clamp(G.x[0], 40, width * .45);
+    G.x[1] = clamp(G.x[1], width * .55, width - 40);
     for (let p = 0; p < 2; p++) {
       const tank = E.tanks[p];
       if (!tank) continue;
@@ -340,19 +349,29 @@
       tank.style.left = `${G.x[p]}px`;
       tank.style.top = `${y - 12}px`;
     }
+    updateCamera();
+  }
+
+  function updateCamera(targetX = null) {
+    if (!E.world || !E.field) return;
+    const viewWidth = E.field.clientWidth || window.innerWidth;
+    const focusX = targetX !== null ? targetX : G.x[G.active];
+    let offsetX = viewWidth / 2 - focusX;
+    offsetX = clamp(offsetX, -(1800 - viewWidth), 0);
+    E.world.style.transform = `translateX(${offsetX}px)`;
   }
 
   function spawnCrate() {
     const { width } = size();
     if (!width || !E.crate) return;
-    G.cratePos.x = width * (.35 + Math.random() * .3);
+    G.cratePos.x = width * (.3 + Math.random() * .4);
     G.cratePos.y = groundAt(G.cratePos.x) - 70;
     G.crateActive = true;
 
     E.crate.style.left = `${G.cratePos.x}px`;
     E.crate.style.top = `${G.cratePos.y}px`;
     E.crate.classList.remove("hidden");
-    notify("🎁 Supply Crate dropped in the sky! Shoot it to claim!");
+    notify("🎁 Supply Crate dropped! Shoot it to claim!");
   }
 
   function startMatch() {
@@ -362,17 +381,32 @@
       if (!isBattleActive()) return;
       resizeCanvases();
       const { width } = size();
-      G.x = [width * .12, width * .88];
+      G.x = [width * .25, width * .75];
       generateTerrain();
       drawTerrain();
       positionTanks();
-      G.running = true;
-      G.angle[0] = 45;
-      G.angle[1] = 45;
-      updateHUD();
-      drawAim();
-      spawnCrate();
-      maybeComputerTurn();
+      
+      // Cinematic Pre-Battle Tank Showcase
+      G.busy = true;
+      updateCamera(G.x[0]);
+      notify(`Battle Start! ${playerName(0)} vs ${playerName(1)}`);
+      
+      setTimeout(() => {
+        if (!G.running) return;
+        updateCamera(G.x[1]);
+        setTimeout(() => {
+          if (!G.running) return;
+          G.running = true;
+          G.angle = [45, 45];
+          G.power = 60;
+          G.busy = false;
+          updateCamera(G.x[0]);
+          updateHUD();
+          drawAim();
+          spawnCrate();
+          maybeComputerTurn();
+        }, 1200);
+      }, 1200);
     });
   }
 
@@ -397,14 +431,29 @@
     if (!G.running || G.paused || G.busy || (G.mode === "computer" && G.active === 1)) return;
 
     const start = muzzle(G.active);
-    const v = getVector(G.active);
-    const length = 50 + G.power * 1.0;
+    const vector = getVector(G.active);
+    const speed = 190 + G.power * 3.4;
+
+    let currX = start.x;
+    let currY = start.y;
+    let vx = vector.x * speed;
+    let vy = vector.y * speed;
+    const dt = 0.025;
 
     aimCtx.save();
     aimCtx.setLineDash([4, 4]);
     aimCtx.beginPath();
-    aimCtx.moveTo(start.x, start.y);
-    aimCtx.lineTo(start.x + v.x * length, start.y + v.y * length);
+    aimCtx.moveTo(currX, currY);
+
+    for (let step = 0; step < 35; step++) {
+      vx += G.wind * 1.5 * dt;
+      vy += RULES.gravity * dt;
+      currX += vx * dt;
+      currY += vy * dt;
+      aimCtx.lineTo(currX, currY);
+      if (currY >= groundAt(currX) || currX < 0 || currX > width) break;
+    }
+
     aimCtx.strokeStyle = G.active === 0 ? "#7dc7ff" : "#ff9b9b";
     aimCtx.lineWidth = 2;
     aimCtx.stroke();
@@ -412,7 +461,8 @@
   }
 
   function updateHUD() {
-    if (E.turn) E.turn.textContent = `${playerName(G.active)}'s Turn`;
+    const windDirection = G.wind >= 0 ? "➔" : "⬅";
+    if (E.turn) E.turn.textContent = `${playerName(G.active)}'s Turn | 💨 ${windDirection} ${Math.abs(G.wind)}`;
     if (E.round) E.round.textContent = String(G.round);
     if (E.angle) E.angle.textContent = `${Math.round(G.angle[G.active])}°`;
     if (E.power) E.power.value = String(G.power);
@@ -424,7 +474,8 @@
       if (E.hpFills[p]) E.hpFills[p].style.width = `${clamp(G.health[p], 0, 100)}%`;
       if (E.weaponTexts[p]) {
         const w = G.weapons[p];
-        E.weaponTexts[p].textContent = w === "cluster" ? "Ammo: 💥 Cluster" : w === "heavy" ? "Ammo: 💣 Heavy" : w === "armor" ? "Ammo: 🛡️ Armor" : "Ammo: Standard";
+        const inv = G.inventory[p] !== "none" ? ` (Stored: ${G.inventory[p]})` : "";
+        E.weaponTexts[p].textContent = (w === "cluster" ? "Ammo: 💥 Cluster" : w === "heavy" ? "Ammo: 💣 Heavy" : "Ammo: Standard") + inv;
       }
     }
 
@@ -440,15 +491,29 @@
     if (!canControl() || G.steps[G.active] <= 0) return;
     const p = G.active;
     const { width } = size();
-    const min = p === 0 ? 28 : width * .52;
-    const max = p === 0 ? width * .48 : width - 28;
+    const min = p === 0 ? 40 : width * .52;
+    const max = p === 0 ? width * .48 : width - 40;
     const next = clamp(G.x[p] + direction * RULES.moveDistance, min, max);
     if (Math.abs(next - G.x[p]) < 1) return;
     G.x[p] = next;
     G.steps[p]--;
     positionTanks();
+    updateCamera(G.x[p]);
     drawAim();
     updateHUD();
+  }
+
+  function startHoldMove(dir) {
+    moveTank(dir);
+    clearInterval(G.moveInterval);
+    G.moveInterval = setInterval(() => {
+      if (G.steps[G.active] > 0) moveTank(dir);
+      else clearInterval(G.moveInterval);
+    }, 250);
+  }
+
+  function stopHoldMove() {
+    clearInterval(G.moveInterval);
   }
 
   function setAngleFromPoint(point) {
@@ -487,9 +552,9 @@
     menu.appendChild(title);
 
     const options = [
-      { id: "standard", label: "Standard (Keep Turn)" },
-      { id: "cluster", label: "💥 Cluster" },
-      { id: "heavy", label: "💣 Heavy" },
+      { id: "standard", label: "Standard (Keep Weapon)" },
+      { id: "cluster", label: "💥 Cluster Bomb" },
+      { id: "heavy", label: "💣 Heavy Shell" },
       { id: "armor", label: "🛡️ +25 Armor" }
     ];
 
@@ -504,10 +569,12 @@
         buttonSound();
         if (opt.id === "armor") {
           G.health[player] = clamp(G.health[player] + 25, 0, 125);
-          G.weapons[player] = "standard";
           notify(`🛡️ ${playerName(player)} gained +25 Armor!`);
+        } else if (opt.id === "standard") {
+          notify(`🎁 Saved item for future turns!`);
         } else {
           G.weapons[player] = opt.id;
+          G.inventory[player] = opt.id;
           notify(`🎁 ${playerName(player)} equipped ${opt.label}!`);
         }
         removeCrateMenu();
@@ -543,9 +610,9 @@
 
     const shell = document.createElement("div");
     Object.assign(shell.style, {
-      position: "absolute", left: `${x}px`, top: `${y}px`, width: "9px", height: "9px",
+      position: "absolute", left: `${x}px`, top: `${y}px`, width: "10px", height: "10px",
       borderRadius: "50%", background: weaponType === "heavy" ? "#ff9130" : weaponType === "cluster" ? "#ffd700" : (shooter === 0 ? "#8ed5ff" : "#ff8b72"),
-      boxShadow: "0 0 10px rgba(255,190,90,.9)", transform: "translate(-50%, -50%)"
+      boxShadow: "0 0 12px rgba(255,190,90,.9)", transform: "translate(-50%, -50%)"
     });
     E.projectileLayer?.appendChild(shell);
 
@@ -561,13 +628,18 @@
       }
       const dt = Math.min((now - previous) / 1000, .035);
       previous = now;
+
+      vx += G.wind * 1.5 * dt;
       vy += RULES.gravity * dt;
       x += vx * dt;
       y += vy * dt;
       shell.style.left = `${x}px`;
       shell.style.top = `${y}px`;
 
-      if (G.crateActive && Math.hypot(x - G.cratePos.x, y - G.cratePos.y) < 22) {
+      // Camera scrolls to follow shell
+      updateCamera(x);
+
+      if (G.crateActive && Math.hypot(x - G.cratePos.x, y - G.cratePos.y) < 24) {
         shell.remove();
         G.crateActive = false;
         E.crate?.classList.add("hidden");
@@ -587,7 +659,7 @@
       const target = other(shooter);
       const targetPoint = { x: G.x[target], y: groundAt(G.x[target]) - 14 };
 
-      if (Math.hypot(x - targetPoint.x, y - targetPoint.y) < 20) {
+      if (Math.hypot(x - targetPoint.x, y - targetPoint.y) < 22) {
         shell.remove();
         explode(x, y, target, shooter, weaponType, token);
         return;
@@ -607,8 +679,11 @@
   function explode(x, y, target, shooter, weaponType, token) {
     if (token !== G.matchToken || !G.running) return;
 
-    const blastRadius = weaponType === "heavy" ? RULES.blastRadius * 1.3 : RULES.blastRadius;
-    const maxDmg = weaponType === "heavy" ? RULES.maxDamage * 1.5 : RULES.maxDamage;
+    const blastRadius = weaponType === "heavy" ? RULES.blastRadius * 1.4 : RULES.blastRadius;
+    const maxDmg = weaponType === "heavy" ? RULES.maxDamage * 1.6 : RULES.maxDamage;
+
+    // Big Crater deformation on terrain
+    carveTerrain(x, blastRadius);
 
     const blast = document.createElement("div");
     Object.assign(blast.style, {
@@ -630,35 +705,98 @@
     if (weaponType === "cluster") {
       setTimeout(() => {
         for (let i = -1; i <= 1; i++) {
-          const cx = x + i * 25;
+          const cx = x + i * 30;
           const cy = groundAt(cx) - 10;
+          carveTerrain(cx, blastRadius * 0.6);
           const subDist = Math.hypot(cx - G.x[target], cy - targetY);
           if (subDist <= RULES.blastRadius) {
-            G.health[target] = Math.max(0, G.health[target] - 8);
+            G.health[target] = Math.max(0, G.health[target] - 10);
           }
         }
+        drawTerrain();
+        positionTanks();
         updateHUD();
       }, 200);
     }
 
+    drawTerrain();
+    positionTanks();
     G.weapons[shooter] = "standard";
     updateHUD();
 
-    setTimeout(() => blast.remove(), 350);
+    setTimeout(() => blast.remove(), 400);
     setTimeout(() => {
       if (token !== G.matchToken || !G.running) return;
-      if (G.health[target] <= 0) finishMatch(shooter);
-      else endTurn();
-    }, 350);
+      if (G.health[target] <= 0) {
+        playDefeatAnimation(target, shooter);
+      } else {
+        endTurn();
+      }
+    }, 400);
+  }
+
+  function carveTerrain(cx, radius) {
+    G.terrain.forEach(pt => {
+      const dist = Math.abs(pt.x - cx);
+      if (dist < radius) {
+        const depth = Math.sqrt(radius * radius - dist * dist) * 0.6;
+        pt.y = Math.min(size().height * 0.88, pt.y + depth);
+      }
+    });
+  }
+
+  // 3-Second Defeat / Explosion Animation Sequence
+  function playDefeatAnimation(loser, winner) {
+    G.busy = true;
+    updateCamera(G.x[loser]);
+    notify(`💥 Critical hit on ${playerName(loser)}!`);
+
+    let steps = 0;
+    const interval = setInterval(() => {
+      steps++;
+      // Spawn chain reaction explosion sparks
+      const spark = document.createElement("div");
+      const offsetX = (Math.random() - 0.5) * 50;
+      const offsetY = (Math.random() - 0.5) * 50;
+      Object.assign(spark.style, {
+        position: "absolute", left: `${G.x[loser] + offsetX}px`, top: `${groundAt(G.x[loser]) + offsetY}px`,
+        width: "25px", height: "25px", borderRadius: "50%", background: "radial-gradient(circle, #ffcc00, #ff3300)",
+        transform: "translate(-50%, -50%)", zIndex: "50", pointerEvents: "none"
+      });
+      E.effectLayer?.appendChild(spark);
+      setTimeout(() => spark.remove(), 400);
+
+      if (steps >= 6) {
+        clearInterval(interval);
+        // Final massive explosion flash
+        const finalBoom = document.createElement("div");
+        Object.assign(finalBoom.style, {
+          position: "absolute", left: `${G.x[loser]}px`, top: `${groundAt(G.x[loser])}px`,
+          width: "120px", height: "120px", borderRadius: "50%", background: "radial-gradient(circle, #fff, #ff5500, transparent)",
+          transform: "translate(-50%, -50%)", zIndex: "60", pointerEvents: "none"
+        });
+        E.effectLayer?.appendChild(finalBoom);
+        setTimeout(() => finalBoom.remove(), 600);
+
+        setTimeout(() => {
+          finishMatch(winner);
+        }, 800);
+      }
+    }, 400);
   }
 
   function endTurn() {
     if (!G.running) return;
     G.active = other(G.active);
     if (G.active === 0) G.round++;
+    
+    G.wind = Math.round((Math.random() * 50) - 25);
     G.steps = [RULES.movesPerTurn, RULES.movesPerTurn];
-    G.angle[G.active] = 45; // Reset aim to default every round/turn
+    G.angle = [45, 45];
+    G.power = 60;
+    
     G.busy = false;
+    updateCamera(G.x[G.active]);
     updateHUD();
     drawAim();
     maybeComputerTurn();
@@ -667,6 +805,7 @@
   function maybeComputerTurn() {
     if (!G.running || G.paused || G.mode !== "computer" || G.active !== 1) return;
     G.busy = true;
+    updateCamera(G.x[1]);
     updateHUD();
     
     clearTimeout(G.aiTimer);
@@ -677,8 +816,8 @@
         return;
       }
       const dx = Math.abs(G.x[0] - G.x[1]);
-      G.angle[1] = clamp(25 + (dx / 12) + (Math.random() * 12 - 6), RULES.minAngle, RULES.maxAngle);
-      G.power = clamp(40 + (dx / 6) + (Math.random() * 15 - 7.5), 25, 95);
+      G.angle[1] = clamp(28 + (dx / 12) - (G.wind * 0.4) + (Math.random() * 10 - 5), RULES.minAngle, RULES.maxAngle);
+      G.power = clamp(42 + (dx / 6) + (Math.random() * 12 - 6), 25, 95);
       
       G.busy = false;
       updateHUD();
@@ -785,8 +924,14 @@
     $("continue-btn")?.addEventListener("click", () => { buttonSound(); if (G.paused) togglePause(); });
     $("save-match-btn")?.addEventListener("click", () => { buttonSound(); saveMatch(); });
 
-    $("move-left-btn")?.addEventListener("click", () => { buttonSound(); moveTank(-1); });
-    $("move-right-btn")?.addEventListener("click", () => { buttonSound(); moveTank(1); });
+    E.left?.addEventListener("pointerdown", () => { buttonSound(); startHoldMove(-1); });
+    E.left?.addEventListener("pointerup", stopHoldMove);
+    E.left?.addEventListener("pointerleave", stopHoldMove);
+
+    E.right?.addEventListener("pointerdown", () => { buttonSound(); startHoldMove(1); });
+    E.right?.addEventListener("pointerup", stopHoldMove);
+    E.right?.addEventListener("pointerleave", stopHoldMove);
+
     E.fire?.addEventListener("click", () => { buttonSound(); fireShot(); });
 
     E.power?.addEventListener("input", () => {
