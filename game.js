@@ -2,8 +2,8 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
-  const SAVE_KEY = "tankWarLocalSaveV14";
-  const SETTINGS_KEY = "tankWarSettingsV14";
+  const SAVE_KEY = "tankWarLocalSaveV15";
+  const SETTINGS_KEY = "tankWarSettingsV15";
 
   const RULES = {
     health: 100,
@@ -339,7 +339,12 @@
       if (!tank) continue;
       const y = groundAt(G.x[p]);
       tank.style.left = `${G.x[p]}px`;
-      tank.style.top = `${y - 14}px`; // Perfectly anchors tanks right on top of the ground
+      tank.style.top = `${y - 14}px`;
+      
+      // Face Player 1 right and Player 2 left toward each other strictly
+      if (E.tankImages[p]) {
+        E.tankImages[p].style.transform = p === 1 ? "scaleX(-1)" : "scaleX(1)";
+      }
     }
     updateCamera();
   }
@@ -406,6 +411,7 @@
     });
   }
 
+  // Proper directional vector: Player 0 fires right (+X), Player 1 fires left (-X)
   function getVector(player) {
     const direction = player === 0 ? 1 : -1;
     const rad = G.angle[player] * Math.PI / 180;
@@ -420,6 +426,7 @@
     };
   }
 
+  // Draw straight, clear aiming line indicator
   function drawAim() {
     if (!aimCtx || !E.field) return;
     const { width, height } = size();
@@ -428,30 +435,14 @@
 
     const start = muzzle(G.active);
     const vector = getVector(G.active);
-    const speed = 190 + G.power * 3.4;
-
-    let currX = start.x;
-    let currY = start.y;
-    let vx = vector.x * speed;
-    let vy = vector.y * speed;
-    const dt = 0.025;
+    const lineLength = 65 + (G.power * 0.6);
 
     aimCtx.save();
-    aimCtx.setLineDash([4, 4]);
     aimCtx.beginPath();
-    aimCtx.moveTo(currX, currY);
-
-    for (let step = 0; step < 35; step++) {
-      vx += G.wind * 1.5 * dt;
-      vy += RULES.gravity * dt;
-      currX += vx * dt;
-      currY += vy * dt;
-      aimCtx.lineTo(currX, currY);
-      if (currY >= groundAt(currX) || currX < 0 || currX > width) break;
-    }
-
+    aimCtx.moveTo(start.x, start.y);
+    aimCtx.lineTo(start.x + vector.x * lineLength, start.y + vector.y * lineLength);
     aimCtx.strokeStyle = G.active === 0 ? "#7dc7ff" : "#ff9b9b";
-    aimCtx.lineWidth = 2;
+    aimCtx.lineWidth = 3;
     aimCtx.stroke();
     aimCtx.restore();
   }
@@ -512,6 +503,7 @@
     clearInterval(G.moveInterval);
   }
 
+  // Consistent touch/click aiming for both Player 1 and Player 2
   function setAngleFromPoint(point) {
     if (!canControl()) return;
     const start = muzzle(G.active);
@@ -700,7 +692,7 @@
     }
 
     drawTerrain();
-    positionTanks(); // Instantly repositions tanks to the new crater floor!
+    positionTanks();
     G.weapons[shooter] = "standard";
     updateHUD();
 
