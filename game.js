@@ -2,8 +2,8 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
-  const SAVE_KEY = "tankWarLocalSaveV19";
-  const SETTINGS_KEY = "tankWarSettingsV19";
+  const SAVE_KEY = "tankWarLocalSaveV21";
+  const SETTINGS_KEY = "tankWarSettingsV21";
 
   const RULES = {
     health: 100,
@@ -28,7 +28,6 @@
     tank6: "tank6.png"
   };
 
-  // Custom muzzle graphic mapping for every tank type
   const MUZZLE_IMAGES = {
     tank1: "muzzle1.png",
     tank2: "muzzle2.png",
@@ -190,6 +189,7 @@
     requestAnimationFrame(() => {
       if (isBattleActive()) {
         resizeCanvases();
+        generateTerrain();
         drawTerrain();
         positionTanks();
         drawAim();
@@ -578,7 +578,6 @@
     const speed = 190 + G.power * 3.4;
     const weaponType = G.weapons[shooter];
 
-    // Spawn custom muzzle flash graphic at barrel tip
     const flash = document.createElement("img");
     flash.src = muzzleSrc(shooter);
     flash.onerror = () => { flash.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><circle cx='12' cy='12' r='10' fill='%23ffaa00'/></svg>"; };
