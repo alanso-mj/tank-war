@@ -2,8 +2,8 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
-  const SAVE_KEY = "tankWarLocalSaveV22";
-  const SETTINGS_KEY = "tankWarSettingsV22";
+  const SAVE_KEY = "tankWarLocalSaveV23";
+  const SETTINGS_KEY = "tankWarSettingsV23";
 
   const RULES = {
     health: 100,
