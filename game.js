@@ -2,8 +2,8 @@
   "use strict";
 
   const $ = id => document.getElementById(id);
-  const SAVE_KEY = "tankWarLocalSaveV21";
-  const SETTINGS_KEY = "tankWarSettingsV21";
+  const SAVE_KEY = "tankWarLocalSaveV22";
+  const SETTINGS_KEY = "tankWarSettingsV22";
 
   const RULES = {
     health: 100,
@@ -133,7 +133,7 @@
 
   const size = () => ({
     width: 1800,
-    height: E.field?.clientHeight || window.innerHeight || 500,
+    height: Math.max(E.field?.clientHeight || 0, window.innerHeight || 0, 400),
     viewWidth: E.field?.clientWidth || window.innerWidth || 800
   });
 
@@ -383,7 +383,7 @@
   function startMatch() {
     stopMatch();
     showScreen(E.battle);
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       if (!isBattleActive()) return;
       resizeCanvases();
       const { width } = size();
@@ -400,7 +400,7 @@
       updateHUD();
       drawAim();
       spawnCrate();
-    });
+    }, 50);
   }
 
   function getVector(player) {
