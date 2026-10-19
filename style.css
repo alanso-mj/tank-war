@@ -235,17 +235,40 @@ html, body {
   touch-action: none;
 }
 
+/* PLACEMENT FIX: the scrolling world is 1800px wide and as tall as the screen.
+   The canvases are sized by game.js, so no width/height is forced on them here. */
+#world-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1800px;
+  height: 100%;
+  will-change: transform;
+}
 
 #terrain-canvas, #aim-canvas {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
+  position: absolute;
+  top: 0;
+  left: 0;
   pointer-events: none;
 }
 
+#projectile-layer, #effect-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
 
+#projectile-layer { z-index: 20; }
+#effect-layer { z-index: 30; }
+
+.supply-crate {
+  position: absolute;
+  z-index: 15;
+  font-size: 2rem;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
 
 .battle-tank {
   position: absolute;
