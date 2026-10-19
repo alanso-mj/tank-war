@@ -131,7 +131,6 @@
   const canControl = () =>
     G.running && !G.paused && !G.busy && G.health[G.active] > 0;
 
-  // FIXED: Prioritizes window.innerHeight so canvas never collapses to 0 height on start
   const size = () => ({
     width: 1800,
     height: window.innerHeight || E.field?.clientHeight || 600,
@@ -579,21 +578,6 @@
     const speed = 190 + G.power * 3.4;
     const weaponType = G.weapons[shooter];
 
-    const flash = document.createElement("img");
-    flash.src = muzzleSrc(shooter);
-    flash.onerror = () => { flash.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><circle cx='12' cy='12' r='10' fill='%23ffaa00'/></svg>"; };
-    Object.assign(flash.style, {
-      position: "absolute", left: `${start.x}px`, top: `${start.y}px`,
-      width: "28px", height: "28px", transform: "translate(-50%, -50%) scale(1.4)",
-      zIndex: "40", pointerEvents: "none", transition: "transform 0.15s ease-out, opacity 0.15s ease-out"
-    });
-    E.effectLayer?.appendChild(flash);
-    setTimeout(() => {
-      flash.style.transform = "translate(-50%, -50%) scale(0.2)";
-      flash.style.opacity = "0";
-      setTimeout(() => flash.remove(), 150);
-    }, 60);
-
     let x = start.x;
     let y = start.y;
     let vx = vector.x * speed;
@@ -601,13 +585,46 @@
     let previous = performance.now();
     const token = G.matchToken;
 
+    // Create the projectile wrapper container that travels with the shell
     const shell = document.createElement("div");
     Object.assign(shell.style, {
-      position: "absolute", left: `${x}px`, top: `${y}px`, width: "10px", height: "10px",
-      borderRadius: "50%", background: weaponType === "heavy" ? "#ff9130" : weaponType === "cluster" ? "#ffd700" : (shooter === 0 ? "#8ed5ff" : "#ff8b72"),
-      boxShadow: "0 0 12px rgba(255,190,90,.9)", transform: "translate(-50%, -50%)"
+      position: "absolute", left: `${x}px`, top: `${y}px`, width: "16px", height: "16px",
+      transform: "translate(-50%, -50%)", zIndex: "20"
     });
+
+    // Projectile core dot
+    const dot = document.createElement("div");
+    Object.assign(dot.style, {
+      position: "absolute", inset: "3px",
+      borderRadius: "50%", background: weaponType === "heavy" ? "#ff9130" : weaponType === "cluster" ? "#ffd700" : (shooter === 0 ? "#8ed5ff" : "#ff8b72"),
+      boxShadow: "0 0 12px rgba(255,190,90,.9)"
+    });
+    shell.appendChild(dot);
+
+    // Muzzle flash traveling with the projectile launch
+    const flash = document.createElement("img");
+    flash.src = muzzleSrc(shooter);
+    flash.onerror = () => { flash.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'><circle cx='12' cy='12' r='10' fill='%23ffaa00'/></svg>"; };
+    
+    const flashAngle = Math.atan2(vector.y, vector.x) * (180 / Math.PI);
+    Object.assign(flash.style, {
+      position: "absolute", left: "50%", top: "50%",
+      width: "32px", height: "32px",
+      transform: `translate(-50%, -50%) rotate(${flashAngle}deg) scale(1.3)`,
+      transformOrigin: "center center",
+      pointerEvents: "none",
+      transition: "opacity 0.1s ease-out"
+    });
+    shell.appendChild(flash);
     E.projectileLayer?.appendChild(shell);
+
+    // Fade out and remove muzzle flash quickly after firing
+    setTimeout(() => {
+      if (flash) {
+        flash.style.opacity = "0";
+        setTimeout(() => flash.remove(), 100);
+      }
+    }, 120);
 
     function frame(now) {
       if (token !== G.matchToken || !G.running) {
@@ -886,11 +903,6 @@
       drawAim();
     });
 
-    // PLACEMENT FIX: the battlefield is no longer cloned/replaced. Cloning created
-    // brand-new canvases and tanks, while E.* kept pointing at the old removed ones,
-    // so terrain and tanks were drawn on elements that were no longer on screen.
-    // Touch positions are measured against the world container so aiming stays
-    // correct when the camera has scrolled.
     const field = E.field;
     if (field) {
       field.addEventListener("pointerdown", e => {
