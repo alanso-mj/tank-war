@@ -886,26 +886,27 @@
       drawAim();
     });
 
+    // PLACEMENT FIX: the battlefield is no longer cloned/replaced. Cloning created
+    // brand-new canvases and tanks, while E.* kept pointing at the old removed ones,
+    // so terrain and tanks were drawn on elements that were no longer on screen.
+    // Touch positions are measured against the world container so aiming stays
+    // correct when the camera has scrolled.
     const field = E.field;
     if (field) {
-      const newField = field.cloneNode(true);
-      field.parentNode.replaceChild(newField, field);
-      E.field = newField;
-
-      E.field.addEventListener("pointerdown", e => {
+      field.addEventListener("pointerdown", e => {
         if (!canControl()) return;
         if (e.target.closest("button") || e.target.closest(".ingame-controls") || e.target.closest(".ingame-hud") || e.target.closest(".overlay") || e.target.closest("#crate-choice-menu")) {
           return;
         }
-        const rect = E.field.getBoundingClientRect();
+        const rect = E.world.getBoundingClientRect();
         G.dragging = true;
         G.pointerId = e.pointerId;
         setAngleFromPoint({ x: e.clientX - rect.left, y: e.clientY - rect.top });
       });
 
-      E.field.addEventListener("pointermove", e => {
+      field.addEventListener("pointermove", e => {
         if (!G.dragging || e.pointerId !== G.pointerId) return;
-        const rect = E.field.getBoundingClientRect();
+        const rect = E.world.getBoundingClientRect();
         setAngleFromPoint({ x: e.clientX - rect.left, y: e.clientY - rect.top });
       });
 
@@ -914,8 +915,8 @@
         G.dragging = false;
         G.pointerId = null;
       };
-      E.field.addEventListener("pointerup", endDrag);
-      E.field.addEventListener("pointercancel", endDrag);
+      field.addEventListener("pointerup", endDrag);
+      field.addEventListener("pointercancel", endDrag);
     }
 
     E.names.forEach((input, index) => {
