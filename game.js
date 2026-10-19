@@ -131,9 +131,10 @@
   const canControl = () =>
     G.running && !G.paused && !G.busy && G.health[G.active] > 0;
 
+  // FIXED: Prioritizes window.innerHeight so canvas never collapses to 0 height on start
   const size = () => ({
     width: 1800,
-    height: Math.max(E.field?.clientHeight || 0, window.innerHeight || 0, 400),
+    height: window.innerHeight || E.field?.clientHeight || 600,
     viewWidth: E.field?.clientWidth || window.innerWidth || 800
   });
 
@@ -295,7 +296,7 @@
       const t = x / width;
       const y = clamp(
         height * .72 + Math.sin(t * Math.PI * 3.5) * height * .08,
-        height * .48, height * .82
+        height * .48, height * .88
       );
       G.terrain.push({ x, y });
     }
